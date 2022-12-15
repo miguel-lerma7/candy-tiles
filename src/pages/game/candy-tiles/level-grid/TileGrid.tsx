@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLevelContext } from '../../../../context/LevelContext';
-import { tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
+import { levelList } from '../../../../data/level-layouts';
+import { COLUMN_NUMBER, ROW_NUMBER, tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
 import tileClickSFX from './../../../../assets/audio/tileClick.mp3';
+import levelManager from './level-manager';
 import LevelManager from './level-manager';
 import FrostTile from './tiles/FrostTile';
 import RockTile from './tiles/RockTile';
@@ -17,7 +19,7 @@ const getTileComponent = (tileType: string, index: number): JSX.Element => {
 		case 'Frozen':
 			return <FrostTile key={index} index={index}></FrostTile>;
 
-		case 'Rock':      
+		case 'Rock':
 			return <RockTile key={index} index={index}></RockTile>;
 
 		default:
@@ -25,11 +27,9 @@ const getTileComponent = (tileType: string, index: number): JSX.Element => {
 	}
 };
 
-type TileGridProps = {
-	tiles: LevelTile[];
-};
-
-const TileGrid = ({ tiles }: TileGridProps) => {
+const TileGrid = () => {
+	const selectedLevel = levelList[0];
+	const [tileList, setTileList] = useState(selectedLevel.tiles);
 	const dragging = useRef<boolean>(false);
 	const levelContext = useLevelContext();
 	const firstTile = useRef<HTMLElement | null>();
@@ -37,7 +37,14 @@ const TileGrid = ({ tiles }: TileGridProps) => {
 
 	useEffect(() => {
 		tileClickAudio.current.volume = 0.5;
+		LevelManager.subscribeTilesChange(onTilesChange);
+
+		return () => {
+			LevelManager.unsubscribeTilesChange(onTilesChange);
+		};
 	}, []);
+
+	const onTilesChange = () => setTileList(levelManager.levelData.tiles);
 
 	const handleMouseDown = (e: React.MouseEvent): void => {
 		if (!elementIsTile(e.target as HTMLElement)) return;
@@ -69,12 +76,13 @@ const TileGrid = ({ tiles }: TileGridProps) => {
 
 	return (
 		<div
-			className="grid grid-rows-[repeat(9,1fr)] grid-cols-[repeat(9,1fr)] absolute top-0 left-0 w-full h-full"
+			className="grid absolute top-0 left-0 w-full h-full"
+			style={{ gridTemplateColumns: `repeat(${COLUMN_NUMBER}, 1fr)`, gridTemplateRows: `repeat(${ROW_NUMBER}, 1fr)` }}
 			onMouseDown={handleMouseDown}
 			onMouseUp={handleMouseUp}
 			onMouseOver={handleMouseOver}
 		>
-			{tiles.map((tile, index) => (tile === null ? <div key={index}> </div> : getTileComponent(tile.type, index)))}
+			{tileList.map((tile, index) => (tile === null ? <div key={index}> </div> : getTileComponent(tile.type, index)))}
 		</div>
 	);
 };

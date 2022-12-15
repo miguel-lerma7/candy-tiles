@@ -1,15 +1,15 @@
 import uuid from "react-uuid";
 import { getNumberRangeArray, getNumberSequenceArray } from "../utils/array";
 
-export const COLUMN_NUMBER = 9;
-export const ROW_NUMBER = 9;
+export const COLUMN_NUMBER = parseInt(import.meta.env.VITE_COLUMN_NUMBER);
+export const ROW_NUMBER = parseInt(import.meta.env.VITE_ROW_NUMBER);
+export const CANDY_COLOR_LIST: string[] = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 
 export const tilesAreAdjacent = (firstIndex: number, secondIndex: number): boolean => {
   const adjacentIndexes = [-COLUMN_NUMBER, 1, COLUMN_NUMBER, -1];
   const areAdjacent = adjacentIndexes.some(x => (x + firstIndex) === secondIndex);
   return areAdjacent;
 };
-
 
 type TileMovePosition = [number, number];
 
@@ -23,7 +23,7 @@ type CandyInLevel = { index: number } & Candy;
 
 const getCandyMatchings = (candy: CandyInLevel, items: readonly LevelItem[]): MatchDetail => {
   //console.log(candy.index);
-  const rowIndex = Math.ceil((candy.index + 1) / ROW_NUMBER);
+  const rowIndex = Math.ceil((candy.index + 1) / COLUMN_NUMBER);
   const columnIndex = (candy.index + 1) - ((rowIndex - 1) * ROW_NUMBER);
 
   const leftIterations = columnIndex - 1;
@@ -133,36 +133,9 @@ export const repositionItems = (items: readonly LevelItem[], tiles: readonly Lev
   }
 };
 
-const candyColorArray: string[] = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
-export const tryGetLevelItemByFusion = (matchDetail: MatchDetail, previousItem: LevelItem): LevelItem => {
-  let item: LevelItem = null;
-  const superCandyFusion = (matchDetail.left + matchDetail.right) > 2 || (matchDetail.down + matchDetail.up) > 2;
-  const chocolateFusion = [matchDetail.up, matchDetail.left, matchDetail.right, matchDetail.down].filter(x => x > 1).reduce((acc, curr) => acc + curr, 0) > 3;
-
-  const previousItemWasACandy = previousItem?.type === "Candy" || previousItem?.type === "SuperCandy";
-  if (!previousItemWasACandy) return null
-
-  if (superCandyFusion) {
-    item = {
-      color: previousItem?.color,
-      type: "SuperCandy",
-      key: uuid()
-    } as SuperCandy;
-  }
-
-  if (chocolateFusion) {
-    item = {
-      type: "Chocolate",
-      key: uuid()
-    } as Chocolate;
-  }
-
-  return item;
-}
-
 const getRandomColorCandy = (): LevelItem => {
   return {
-    color: candyColorArray[Math.floor(Math.random() * candyColorArray.length)],
+    color: CANDY_COLOR_LIST[Math.floor(Math.random() * CANDY_COLOR_LIST.length)],
     type: "Candy",
     key: uuid()
   } as Candy;

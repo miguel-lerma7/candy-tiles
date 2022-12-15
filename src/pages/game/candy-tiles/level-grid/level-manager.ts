@@ -1,7 +1,8 @@
 import { delay } from "../../../../utils/delay";
-import { checkForMatchings, generateNewCandies, tryGetLevelItemByFusion, NewItemPosition, repositionItems, allTilesFilled } from "../../../../game-algorithms/tile-matching";
+import { checkForMatchings, generateNewCandies, repositionItems, allTilesFilled } from "../../../../game-algorithms/tile-matching";
 import matchSFX from './../../../../assets/audio/match.mp3';
 import fusionMatchSFX from './../../../../assets/audio/fusionMatch.mp3';
+import { tryGetLevelItemByFusion } from "../../../../game-algorithms/candy-fusions";
 
 const DEFAULT_SWAPPED_CANDY_COLOR = "Red";
 
@@ -12,6 +13,7 @@ class LevelManager {
   private comboStartSubscribers: (() => void)[] = [];
   private comboEndStartSubscribers: (() => void)[] = [];
   private itemsRerenderSubscribers: ((items: LevelItem[]) => void)[] = [];
+  private tilesChangeSubscribers: (() => void)[] = [];
 
   private _levelData: LevelRuntimeData = {
     previousItems: '',
@@ -66,6 +68,10 @@ class LevelManager {
     this.comboEndStartSubscribers.forEach(callback => callback());
   };
 
+  subscribeTilesChange = (callback: () => void): void => { this.tilesChangeSubscribers.push(callback) };
+  unsubscribeTilesChange = (callback: () => void): void => { this.tilesChangeSubscribers = this.tilesChangeSubscribers.filter(x => x !== callback) };
+  notifyTilesChange = (): void => { this.tilesChangeSubscribers.forEach(callback => callback()) };
+
   setItems = (items: LevelItem[], notify: boolean): void => {
     this._levelData.items = structuredClone(items);
     notify && this.notifyItemsChange();
@@ -73,6 +79,7 @@ class LevelManager {
 
   setTiles = (tiles: LevelTile[], notify: boolean): void => {
     this._levelData.tiles = tiles;
+    notify && this.notifyTilesChange();
   };
 
   swapItems = async (items: [number, number]): Promise<void> => {

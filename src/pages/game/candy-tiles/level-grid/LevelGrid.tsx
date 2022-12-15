@@ -7,15 +7,15 @@ import TileGrid from './TileGrid';
 import ItemGrid from './ItemGrid';
 
 const LevelGrid = () => {
-	const selectedLevelLayout = levelList[0];
+	const selectedLevel = levelList[0];
 	const levelContext = useLevelContext();
 	const levelGridElement = useRef<HTMLElement | null>(null);
 
 	useEffect(() => {
-		const initialItems = selectedLevelLayout.items;
+		const initialItems = selectedLevel.items;
 		initialItems.forEach(x => x !== null && (x.key = uuid()));
 
-		const initialTiles = selectedLevelLayout.tiles;
+		const initialTiles = selectedLevel.tiles;
 
 		levelContext?.updateLevelItems(initialItems);
 		LevelManager.setItems(initialItems, false);
@@ -38,8 +38,8 @@ const LevelGrid = () => {
 
 	return (
 		<section className="grow aspect-square rounded-lg overflow-hidden relative select-none" ref={levelGridElement}>
-			<TileGrid tiles={selectedLevelLayout.tiles}></TileGrid>
-			<ItemGrid tiles={selectedLevelLayout.tiles}></ItemGrid>
+			<TileGrid></TileGrid>
+			<ItemGrid></ItemGrid>
 		</section>
 	);
 };

@@ -10,10 +10,18 @@ const FrostTile = ({ index }: TileProps) => {
 		return () => {
 			levelManager.unsubscribeItemsChange(onItemsChange);
 		};
-	}, []);
+	}, [damaged]);
 
 	const onItemsChange = (): void => {
-		//console.log(levelManager.levelData.matchResult.matchingList.some(x => x.index === index && x.matched));
+		const matched = levelManager.levelData.matchResult.matchingList.some(x => x.index === index && x.matched);
+		matched && !damaged && setDamaged(true);
+		console.log(damaged);
+
+		if (matched && damaged) {
+			const newTiles = structuredClone(levelManager.levelData.tiles) as LevelTile[];
+			newTiles[index] = { type: 'Normal' };
+			levelManager.setTiles(newTiles, true);
+		}
 	};
 
 	return (
