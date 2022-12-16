@@ -1,13 +1,21 @@
 import uuid from "react-uuid";
+import { COLUMN_NUMBER, ROW_NUMBER } from "../config";
 import { getNumberRangeArray, getNumberSequenceArray } from "../utils/array";
-
-export const COLUMN_NUMBER = parseInt(import.meta.env.VITE_COLUMN_NUMBER);
-export const ROW_NUMBER = parseInt(import.meta.env.VITE_ROW_NUMBER);
 export const CANDY_COLOR_LIST: string[] = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 
+export const getItemRowIndex = (index: number): number => Math.ceil((index + 1) / COLUMN_NUMBER);
+export const getItemColumnIndex = (index: number): number => (index + 1) - ((getItemRowIndex(index) - 1) * ROW_NUMBER);
+
+const getAdjacentIndexes = (index: number): number[] => {
+  const verticalAdjacentIndexOffsets = [index - COLUMN_NUMBER, index + COLUMN_NUMBER];
+  const horizontalAdjacentIndexOffsets = [index + 1, index - 1];
+
+  return [...verticalAdjacentIndexOffsets.filter(x => getItemColumnIndex(x) === getItemColumnIndex(index)),
+  ...horizontalAdjacentIndexOffsets.filter(x => getItemRowIndex(x) === getItemRowIndex(index))]
+};
+
 export const tilesAreAdjacent = (firstIndex: number, secondIndex: number): boolean => {
-  const adjacentIndexes = [-COLUMN_NUMBER, 1, COLUMN_NUMBER, -1];
-  const areAdjacent = adjacentIndexes.some(x => (x + firstIndex) === secondIndex);
+  const areAdjacent = getAdjacentIndexes(firstIndex).some(x => x === secondIndex);
   return areAdjacent;
 };
 
@@ -22,9 +30,8 @@ export const getTileTargetPosition = (index: number, tileTargetIndex: number): T
 type CandyInLevel = { index: number } & Candy;
 
 const getCandyMatchings = (candy: CandyInLevel, items: readonly LevelItem[]): MatchDetail => {
-  //console.log(candy.index);
-  const rowIndex = Math.ceil((candy.index + 1) / COLUMN_NUMBER);
-  const columnIndex = (candy.index + 1) - ((rowIndex - 1) * ROW_NUMBER);
+  const rowIndex = getItemRowIndex(candy.index);
+  const columnIndex = getItemColumnIndex(candy.index);
 
   const leftIterations = columnIndex - 1;
   const upIterations = rowIndex - 1;
@@ -51,10 +58,6 @@ const getCandyMatchings = (candy: CandyInLevel, items: readonly LevelItem[]): Ma
   const down = matchings.down.count;
   const left = matchings.left.count;
   const matched = (up > 0 && down > 0) || (left > 0 && right > 0) || [up, down, left, right].some(x => x > 1);
-
-  /* console.log({
-    up, right, down, left, matched
-  }); */
 
   return { up, right, down, left, matched, index: candy.index };
 };
@@ -167,4 +170,9 @@ export const getHorizontalAndVerticalItems = (startIndex: number): (number | nul
 export const allTilesFilled = (items: readonly LevelItem[], tiles: readonly LevelTile[]): boolean => {
   return !(structuredClone(items) as LevelItem[]).some((x, index) => tiles[index] !== null && x === null);
 };
+
+export const checkForAdjacentMatch = (index: number, matchList: readonly MatchDetail[]): boolean => {
+  const adjacentIndexes = getAdjacentIndexes(index);
+  return matchList.filter(x => adjacentIndexes.includes(x.index)).some(y => y.matched);
+}
 

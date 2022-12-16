@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { COLUMN_NUMBER, ROW_NUMBER } from '../../../../config';
 import { useLevelContext } from '../../../../context/LevelContext';
 import { levelList } from '../../../../data/level-layouts';
-import { COLUMN_NUMBER, ROW_NUMBER, tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
+import { tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
 import tileClickSFX from './../../../../assets/audio/tileClick.mp3';
 import levelManager from './level-manager';
 import LevelManager from './level-manager';

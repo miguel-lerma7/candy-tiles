@@ -3,6 +3,7 @@ import { checkForMatchings, generateNewCandies, repositionItems, allTilesFilled 
 import matchSFX from './../../../../assets/audio/match.mp3';
 import fusionMatchSFX from './../../../../assets/audio/fusionMatch.mp3';
 import { tryGetLevelItemByFusion } from "../../../../game-algorithms/candy-fusions";
+import { ANIMATION_TIME_MS } from "../../../../config";
 
 const DEFAULT_SWAPPED_CANDY_COLOR = "Red";
 
@@ -92,7 +93,7 @@ class LevelManager {
     this.notifyItemsChange();
     this._levelData.previousItems = JSON.stringify(this._levelData.items);
 
-    await delay(300);
+    await delay(ANIMATION_TIME_MS);
     this.notifyItemsSwap();
     await this.checkMatchings();
 
@@ -136,11 +137,11 @@ class LevelManager {
       this.notifyItemsChange();
       this._levelData.matchResult.matchingList = [];
       this._levelData.matchResult.thereWereMatches = false;
-      await delay(300);
+      await delay(ANIMATION_TIME_MS);
       this.notifyItemsRerender();
-      await delay(300)
+      await delay(ANIMATION_TIME_MS)
       this.updateItemsPositions();
-      await delay(300);
+      await delay(ANIMATION_TIME_MS);
       this.fillEmptyTiles();
       return;
     }

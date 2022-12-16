@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { COLUMN_NUMBER, ROW_NUMBER } from '../../../../game-algorithms/tile-matching';
+import { ANIMATION_TIME_MS, COLUMN_NUMBER } from '../../../../config';
+import { getItemColumnIndex, getItemRowIndex } from '../../../../game-algorithms/tile-matching';
 import Candy from './level-items/Candy';
 import Chocolate from './level-items/Chocolate';
 import SuperCandy from './level-items/SuperCandy';
@@ -55,8 +56,9 @@ const LevelItem = ({ item, initialIndex, id }: LevelItemProps) => {
 	const updateGridPosition = (updateX: boolean = true, updateY: boolean = true): void => {
 		const gridIndex = getItemIndex();
 
-		rowIndexRef.current = Math.ceil((gridIndex + 1) / COLUMN_NUMBER);
-		columnIndexRef.current = gridIndex + 1 - (rowIndexRef.current - 1) * ROW_NUMBER;
+		rowIndexRef.current = getItemRowIndex(gridIndex);
+		columnIndexRef.current = getItemColumnIndex(gridIndex);
+
 		updateX && (positionXRef.current = 100 * (columnIndexRef.current - 1));
 		updateY && (positionYRef.current = 100 * (rowIndexRef.current - 1));
 	};
@@ -74,10 +76,11 @@ const LevelItem = ({ item, initialIndex, id }: LevelItemProps) => {
 
 	return (
 		<div
-			className={`p-[1.7%] aspect-square block absolute duration-300`}
+			className={`p-[1.7%] aspect-square block absolute`}
 			style={{
 				width: `calc(100%/${COLUMN_NUMBER})`,
 				transform: `translate(${positionXRef.current}%, ${positionYRef.current}%)`,
+				transitionDuration: `${ANIMATION_TIME_MS}ms`,
 			}}
 			ref={elementRef}
 		>
