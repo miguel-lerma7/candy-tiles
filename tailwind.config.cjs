@@ -14,8 +14,6 @@ module.exports = {
 			'blue': '#4B56D2',
 			'light-blue': '#82C3EC',
 			'bone': '#F1F6F5',
-			'light-pink': '#FFBDD8',
-			'light-yellow': '#FFEDD4',
 
 			'neu-1': '#F5F7FA',
 			'neu-2': '#E4E7EB',
@@ -36,6 +34,7 @@ module.exports = {
 				OpenSans: ["'Open Sans'"],
 				Lato: ['Lato'],
 				Raleway: ['Raleway'],
+				LilyScriptOne: ['Lily Script One'],
 				System: [
 					'-apple-system',
 					'BlinkMacSystemFont',
