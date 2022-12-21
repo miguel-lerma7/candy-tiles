@@ -24,9 +24,9 @@ const LevelContextProvider = ({ children }: LevelContextProviderProps) => {
 	const updateLevelItems = (items: LevelItem[]): void => setLevelItems(items);
 
 	useEffect(() => {
-		LevelManager.subscribeItemsRerender(onItemsRerender);
+		//LevelManager.subscribeItemsRerender(onItemsRerender);
 		return () => {
-			LevelManager.unsubscribeItemsRerender(onItemsRerender);
+			//LevelManager.unsubscribeItemsRerender(onItemsRerender);
 		};
 	}, []);
 

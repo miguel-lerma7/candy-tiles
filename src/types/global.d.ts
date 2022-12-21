@@ -46,4 +46,6 @@ declare global {
     swappedItems: [number | null, number | null]
     latestSwappedCandyColor: string;
   };
+
+  type SwappedItems = [number | null, number | null];
 }  

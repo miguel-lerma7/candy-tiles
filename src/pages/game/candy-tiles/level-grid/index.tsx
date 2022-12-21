@@ -1,3 +1,3 @@
-import LevelGrid from './LevelGrid';
+import LevelContainer from './LevelContainer';
 
-export default LevelGrid;
+export default LevelContainer;

@@ -1,25 +1,28 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { levelList } from '../../../../data/level-layouts';
 import { useLevelContext } from '../../../../context/LevelContext';
 import LevelManager from './level-manager';
 import uuid from 'react-uuid';
 import TileGrid from './TileGrid';
 import ItemGrid from './ItemGrid';
+import LevelManagerC from './LevelManagerC';
 
-const LevelGrid = () => {
+const LevelContainer = () => {
 	const selectedLevel = levelList[0];
 	const levelContext = useLevelContext();
 	const levelGridElement = useRef<HTMLElement | null>(null);
 
-	useEffect(() => {
+	useMemo(() => {
 		const initialItems = selectedLevel.items;
 		initialItems.forEach(x => x !== null && (x.key = uuid()));
-
+    
 		const initialTiles = selectedLevel.tiles;
-
-		levelContext?.updateLevelItems(initialItems);
 		LevelManager.setItems(initialItems, false);
 		LevelManager.setTiles(initialTiles, false);
+	}, []);
+  
+	useEffect(() => {
+    //levelContext?.updateLevelItems(initialItems);
 		LevelManager.subscribeComboStart(onComboStart);
 		LevelManager.subscribeComboEnd(onComboEnd);
 
@@ -38,10 +41,11 @@ const LevelGrid = () => {
 
 	return (
 		<section className="grow aspect-square rounded-lg overflow-hidden relative select-none" ref={levelGridElement}>
+      <LevelManagerC></LevelManagerC>
 			<TileGrid></TileGrid>
 			<ItemGrid></ItemGrid>
 		</section>
 	);
 };
 
-export default LevelGrid;
+export default LevelContainer;

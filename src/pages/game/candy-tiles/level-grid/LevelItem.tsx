@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { ANIMATION_TIME_MS, COLUMN_NUMBER } from '../../../../config';
 import { getItemColumnIndex, getItemRowIndex } from '../../../../game-algorithms/tile-matching';
+import { levelItemsState } from '../../../../recoil/atoms/levelItems';
+import { renderedLevelItemsState } from '../../../../recoil/atoms/renderedLevelItems';
 import Candy from './level-items/Candy';
 import Chocolate from './level-items/Chocolate';
 import SuperCandy from './level-items/SuperCandy';
 import levelManager from './level-manager';
 
 type LevelItemProps = {
-	item: LevelItem;
 	initialIndex: number;
-	id: string;
 };
 
 const getItemComponent = (item: LevelItem, id: string, itemIndex: number): JSX.Element => {
@@ -28,8 +29,15 @@ const getItemComponent = (item: LevelItem, id: string, itemIndex: number): JSX.E
 	}
 };
 
-const LevelItem = ({ item, initialIndex, id }: LevelItemProps) => {
+const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	const [itemIndex, setItemIndex] = useState(initialIndex);
+	const [itemKey, setItemKey] = useState<null | string>();
+	const [item, setItem] = useRecoilState(renderedLevelItemsState(itemIndex));
+
+	const levelItems = useRecoilValue(levelItemsState);
+
+	const levelItemKeyRef = useRef<string | null>(null);
+
 	const elementRef = useRef<HTMLDivElement | null>(null);
 	const rowIndexRef = useRef<number>(0);
 	const columnIndexRef = useRef<number>(0);
@@ -37,24 +45,38 @@ const LevelItem = ({ item, initialIndex, id }: LevelItemProps) => {
 	const positionYRef = useRef<number>(0);
 
 	useEffect(() => {
+		setItemKey(levelManager.levelData.items[itemIndex]?.key);
+		setItem(levelManager.levelData.items[itemIndex]);
 		updatePosition();
-		levelManager.subscribeItemsChange(onLevelItemsChanged);
-
-		return () => {
-			levelManager.unsubscribeItemsChange(onLevelItemsChanged);
-		};
 	}, []);
 
+	useEffect(() => {
+		if (levelItemKeyRef.current !== null) {
+			return;
+		}
+
+		levelItemKeyRef.current = levelItems[itemIndex]?.key || null;
+	}, [levelItems]);
+
 	const onLevelItemsChanged = (): void => {
-		const itemMatched = !levelManager.levelData.items.some(x => x?.key === id);
-		if (itemMatched) return;
+		const itemMatched = !levelManager.levelData.items.some(x => x?.key === itemKey);
+		//console.log(itemMatched);
+
+		if (itemMatched || !itemKey) return;
 
 		setItemIndex(getItemIndex());
 		updatePosition();
 	};
 
+	const onItemsRerender = (): void => {
+		setItemKey(levelManager.levelData.items[itemIndex]?.key);
+		setItem(levelManager.levelData.items[itemIndex]);
+		//console.log(levelManager.levelData.items);
+	};
+
 	const updateGridPosition = (updateX: boolean = true, updateY: boolean = true): void => {
 		const gridIndex = getItemIndex();
+		//console.log(`${(item as Candy)?.color || ''} - ${gridIndex}`);
 
 		rowIndexRef.current = getItemRowIndex(gridIndex);
 		columnIndexRef.current = getItemColumnIndex(gridIndex);
@@ -70,11 +92,11 @@ const LevelItem = ({ item, initialIndex, id }: LevelItemProps) => {
 		}
 	};
 
-	const getItemIndex = (): number => levelManager.levelData.items.findIndex(x => x?.key === id);
+	const getItemIndex = (): number => levelItems.findIndex(x => x?.key === levelItemKeyRef.current);
 
 	updateGridPosition();
 
-	return (
+	return !!itemKey ? (
 		<div
 			className={`p-[1.7%] aspect-square block absolute`}
 			style={{
@@ -84,8 +106,10 @@ const LevelItem = ({ item, initialIndex, id }: LevelItemProps) => {
 			}}
 			ref={elementRef}
 		>
-			{getItemComponent(item, id, itemIndex)}
+			{getItemComponent(item, itemKey || '', itemIndex)}
 		</div>
+	) : (
+		<></>
 	);
 };
 

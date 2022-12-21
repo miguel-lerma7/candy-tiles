@@ -7,7 +7,7 @@ const MoveCounter = () => {
 				<TbHandMove></TbHandMove>
 				Moves
 			</h3>
-			<span className="text-neu-3 block text-center w-full font-LilyScriptOne font-black text-[22px]">15/20</span>
+			<span className="text-white block text-center w-full font-LilyScriptOne font-black text-[22px]">15/20</span>
 		</div>
 	);
 };

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
 import { COLUMN_NUMBER, ROW_NUMBER } from '../../../../config';
 import { useLevelContext } from '../../../../context/LevelContext';
 import { levelList } from '../../../../data/level-layouts';
 import { tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
+import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
 import tileClickSFX from './../../../../assets/audio/tileClick.mp3';
 import levelManager from './level-manager';
 import LevelManager from './level-manager';
@@ -35,6 +37,7 @@ const TileGrid = () => {
 	const levelContext = useLevelContext();
 	const firstTile = useRef<HTMLElement | null>();
 	const tileClickAudio = useRef<HTMLAudioElement>(new Audio(tileClickSFX));
+	const setSwappedItems = useSetRecoilState(swappedItemsState);
 
 	useEffect(() => {
 		tileClickAudio.current.volume = 0.5;
@@ -67,10 +70,12 @@ const TileGrid = () => {
 
 		if (!tilesAreAdjacent(firstTileIndex, secondTileIndex)) {
 			levelContext?.updateSelectedTiles([null, null]);
+      setSwappedItems([null, null]);
 			return;
 		}
-
-		LevelManager.swapItems([firstTileIndex, secondTileIndex]);
+    
+    setSwappedItems([firstTileIndex, secondTileIndex]);
+		//LevelManager.swapItems([firstTileIndex, secondTileIndex]);
 
 		firstTile.current = null;
 	};

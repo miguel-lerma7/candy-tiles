@@ -45,7 +45,7 @@ const Candy = ({ color, initialIndex, id }: CandyProps) => {
 		indexRef.current = initialIndex;
 	}, [initialIndex]);
 
-	const onLevelItemsChanged = (): void => {
+	const onLevelItemsChanged = (): void => {    
 		const itemMatched = !levelManager.levelData.items.some(x => x?.key === id);
 		itemMatched && setShowFX(true);
 	};
