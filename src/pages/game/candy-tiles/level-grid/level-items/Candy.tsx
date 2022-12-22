@@ -59,7 +59,7 @@ const Candy = ({ color, initialIndex, id }: CandyProps) => {
 					data-candy
 					data-color={color}
 					src={candyImages[color]}
-					className="block w-full h-full m-0 select-none pointer-events-none relative duration-200"
+					className="block w-full h-full m-0 select-none pointer-events-none relative"
 					style={{
 						transform: `translateY(${positionY}%)`,
 					}}

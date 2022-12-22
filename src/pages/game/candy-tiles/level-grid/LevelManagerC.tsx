@@ -1,13 +1,15 @@
-import { useEffect, useMemo } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useEffect, useMemo, useRef } from 'react';
+import { useRecoilCallback, useRecoilState, useRecoilValue } from 'recoil';
 import { ANIMATION_TIME_MS } from '../../../../config';
 import { levelList } from '../../../../data/level-layouts';
-import { allTilesFilled, checkForMatchings } from '../../../../game-algorithms/tile-matching';
+import { allTilesFilled, checkForMatchings, generateNewCandies, repositionItems } from '../../../../game-algorithms/tile-matching';
 import { levelItemsState } from '../../../../recoil/atoms/levelItems';
 import { levelTilesState } from '../../../../recoil/atoms/levelTiles';
 import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
 import matchSFX from './../../../../assets/audio/match.mp3';
 import fusionMatchSFX from './../../../../assets/audio/fusionMatch.mp3';
+import { renderedLevelItemsState } from '../../../../recoil/atoms/renderedLevelItems';
+import { delay } from '../../../../utils/delay';
 
 const matchSound = new Audio(matchSFX);
 const fusionMatchSound = new Audio(fusionMatchSFX);
@@ -33,6 +35,11 @@ const LevelManagerC = () => {
 	const [swappedItems, setSwappedItems] = useRecoilState(swappedItemsState);
 	const [levelItems, setLevelItems] = useRecoilState(levelItemsState);
 	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
+	const updateRenderedLevelItem = useRecoilCallback(({ set }) => (levelItemIndex: number, newLevelItem: LevelItem) => {
+		set(renderedLevelItemsState(levelItemIndex), newLevelItem);
+	});
+
+	const checkingForMatches = useRef(false);
 
 	useEffect(() => {
 		setLevelItems(levelList[0].items);
@@ -41,6 +48,8 @@ const LevelManagerC = () => {
 
 	useEffect(() => swapItems(false), [swappedItems]);
 	useEffect(() => {
+		if (checkingForMatches.current) return;
+
 		setTimeout(() => {
 			checkForMatches();
 		}, ANIMATION_TIME_MS);
@@ -67,31 +76,40 @@ const LevelManagerC = () => {
 			: setLevelItems(newLevelItems);
 	};
 
-	const checkForMatches = () => {
+	const checkForMatches = async () => {
+		checkingForMatches.current = true;
 		const matchResult = checkForMatchings(levelItems);
-		console.log(matchResult);
 
 		if (matchResult.thereWereMatches || !allTilesFilled(levelItems, levelTiles)) {
 			//this._levelData.comboCount += 1;
+			const newLevelItems = applyMatches(levelItems, matchResult.matchingList);
+			setLevelItems(newLevelItems);
 			playMatchSFX();
-			//this.notifyItemsChange();
-			setLevelItems(applyMatches(levelItems, matchResult.matchingList));
 			//this._levelData.matchResult.matchingList = [];
 			//this._levelData.matchResult.thereWereMatches = false;
-			setTimeout(() => {
-				//this.notifyItemsRerender();
-			}, ANIMATION_TIME_MS);
-			setTimeout(() => {
-				//this.updateItemsPositions();
-			}, ANIMATION_TIME_MS * 2);
-			setTimeout(() => {
-				//this.fillEmptyTiles();
-			}, ANIMATION_TIME_MS * 3);
+			await delay(ANIMATION_TIME_MS);
+			newLevelItems.forEach((x, index) => updateRenderedLevelItem(index, x)); //NOTIFY RERENDER
+
+			await delay(ANIMATION_TIME_MS);
+			const repositionedItems = repositionItems(newLevelItems, levelTiles).repositionedItems;
+			setLevelItems(repositionedItems);
+
+			await delay(ANIMATION_TIME_MS);
+			//fillEmtyTiles
+			const newerLevelItems = generateNewCandies(repositionedItems, levelTiles);
+			setLevelItems(generateNewCandies(levelItems, levelTiles));
+			newerLevelItems.forEach((x, index) => updateRenderedLevelItem(index, x)); //NOTIFY RERENDER
+
+			await delay(ANIMATION_TIME_MS);
+			//checkForMatches();
+
 			return;
 		}
 
 		const thereAreSwappedItems = swappedItems.every(x => x !== null);
 		thereAreSwappedItems && swapItems(true);
+
+		checkingForMatches.current = false;
 	};
 
 	return <></>;

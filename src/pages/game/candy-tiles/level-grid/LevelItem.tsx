@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { ANIMATION_TIME_MS, COLUMN_NUMBER } from '../../../../config';
 import { getItemColumnIndex, getItemRowIndex } from '../../../../game-algorithms/tile-matching';
+import useEffectAfterFirstRender from '../../../../hooks/useEffectAfterFirstRender';
 import { levelItemsState } from '../../../../recoil/atoms/levelItems';
 import { renderedLevelItemsState } from '../../../../recoil/atoms/renderedLevelItems';
 import Candy from './level-items/Candy';
 import Chocolate from './level-items/Chocolate';
 import SuperCandy from './level-items/SuperCandy';
 import levelManager from './level-manager';
+import gsap from 'gsap';
 
 type LevelItemProps = {
 	initialIndex: number;
@@ -33,8 +35,8 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	const [itemIndex, setItemIndex] = useState(initialIndex);
 	const [itemKey, setItemKey] = useState<null | string>();
 	const [item, setItem] = useRecoilState(renderedLevelItemsState(itemIndex));
-
 	const levelItems = useRecoilValue(levelItemsState);
+	const renderedLevelItem = useRecoilValue(renderedLevelItemsState(initialIndex));
 
 	const levelItemKeyRef = useRef<string | null>(null);
 
@@ -47,10 +49,26 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	useEffect(() => {
 		setItemKey(levelManager.levelData.items[itemIndex]?.key);
 		setItem(levelManager.levelData.items[itemIndex]);
-		updatePosition();
+
+		gsap.fromTo(
+			elementRef.current,
+			{
+				x: 0,
+				y: 0,
+				xPercent: 100 * (getItemColumnIndex(initialIndex) - 1),
+				yPercent: getItemRowIndex(initialIndex) - 100,
+			},
+			{
+				yPercent: 100 * (getItemRowIndex(initialIndex) - 1),
+				duration: ANIMATION_TIME_MS / 1000,
+				ease: 'bounce.out',
+			}
+		);
 	}, []);
 
 	useEffect(() => {
+		initialIndex === 11 && console.log('level items EFFECT');
+
 		if (levelItemKeyRef.current !== null) {
 			return;
 		}
@@ -58,21 +76,18 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 		levelItemKeyRef.current = levelItems[itemIndex]?.key || null;
 	}, [levelItems]);
 
-	const onLevelItemsChanged = (): void => {
-		const itemMatched = !levelManager.levelData.items.some(x => x?.key === itemKey);
-		//console.log(itemMatched);
+	useEffectAfterFirstRender(() => {
+		initialIndex === 11 && console.log('rendered level items EFFECT');
 
-		if (itemMatched || !itemKey) return;
-
-		setItemIndex(getItemIndex());
-		updatePosition();
-	};
-
-	const onItemsRerender = (): void => {
-		setItemKey(levelManager.levelData.items[itemIndex]?.key);
-		setItem(levelManager.levelData.items[itemIndex]);
-		//console.log(levelManager.levelData.items);
-	};
+		const levelItemMatched = renderedLevelItem === null;
+		levelItemKeyRef.current = levelItems[initialIndex]?.key || null;
+		resetPosition();
+		/* if (levelItemMatched) {
+			console.log(initialIndex);
+			console.log(structuredClone(renderedLevelItem));
+      
+		} */
+	}, [renderedLevelItem]);
 
 	const updateGridPosition = (updateX: boolean = true, updateY: boolean = true): void => {
 		const gridIndex = getItemIndex();
@@ -86,6 +101,16 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	};
 
 	const updatePosition = (): void => {
+		//if (levelItems[initialIndex]?.key === levelItemKeyRef.current) return;
+		initialIndex === 11 && console.log('POSITION UPDATE');
+
+		updateGridPosition();
+		if (elementRef.current) {
+			elementRef.current.style.transform = `translate(${positionXRef.current}%, ${positionYRef.current}%)`;
+		}
+	};
+
+	const resetPosition = (): void => {
 		updateGridPosition();
 		if (elementRef.current) {
 			elementRef.current.style.transform = `translate(${positionXRef.current}%, ${positionYRef.current}%)`;
@@ -96,20 +121,18 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 
 	updateGridPosition();
 
-	return !!itemKey ? (
+	return (
 		<div
 			className={`p-[1.7%] aspect-square block absolute`}
 			style={{
 				width: `calc(100%/${COLUMN_NUMBER})`,
-				transform: `translate(${positionXRef.current}%, ${positionYRef.current}%)`,
-				transitionDuration: `${ANIMATION_TIME_MS}ms`,
+				transform: `translateX(${positionXRef.current}%)`,
+				animationDuration: 'none',
 			}}
 			ref={elementRef}
 		>
 			{getItemComponent(item, itemKey || '', itemIndex)}
 		</div>
-	) : (
-		<></>
 	);
 };
 
