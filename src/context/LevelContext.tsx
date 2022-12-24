@@ -24,10 +24,6 @@ const LevelContextProvider = ({ children }: LevelContextProviderProps) => {
 	const updateLevelItems = (items: LevelItem[]): void => setLevelItems(items);
 
 	useEffect(() => {
-		//LevelManager.subscribeItemsRerender(onItemsRerender);
-		return () => {
-			//LevelManager.unsubscribeItemsRerender(onItemsRerender);
-		};
 	}, []);
 
 	const onItemsRerender = (items: LevelItem[]): void => setLevelItems(structuredClone(items));

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 
 export default (effect: React.EffectCallback, deps?: React.DependencyList | undefined) => {
-  const effectCount = useRef(0);
+  const firstRender = useRef(true);
 
   useEffect(() => {
-    effectCount.current += 1;
-    effectCount.current > 2 && effect();
+    !firstRender.current && effect();
+    firstRender.current = false;
   }, deps)
 }

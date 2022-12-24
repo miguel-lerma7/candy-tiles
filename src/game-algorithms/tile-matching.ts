@@ -64,8 +64,7 @@ const getCandyMatchings = (candy: CandyInLevel, items: readonly LevelItem[]): Ma
 
 const candyTypesArray = ["Candy", "SuperCandy"];
 export const checkForMatchings = (items: readonly LevelItem[]): MatchResult => {
-  const candies = [...items].map((x, index) => ({ ...x, index })).filter(x => candyTypesArray.includes((x as LevelItem)?.type || "")) as CandyInLevel[];
-
+  const candies = [...structuredClone(items)].map((x, index) => ({ ...x, index })).filter(x => candyTypesArray.includes((x as LevelItem)?.type || "")) as CandyInLevel[];
   const candyMatchings: ({ index: number } & MatchDetail)[] = [];
   candies.forEach(candy => candyMatchings.push(getCandyMatchings(candy, items)));
 

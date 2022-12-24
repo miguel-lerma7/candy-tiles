@@ -6,6 +6,8 @@ import uuid from 'react-uuid';
 import TileGrid from './TileGrid';
 import ItemGrid from './ItemGrid';
 import LevelManagerC from './LevelManagerC';
+import DelayComponent from '../../../../components/DelayComponent';
+import { ANIMATION_TIME_MS } from '../../../../config';
 
 const LevelContainer = () => {
 	const selectedLevel = levelList[0];
@@ -15,14 +17,14 @@ const LevelContainer = () => {
 	useMemo(() => {
 		const initialItems = selectedLevel.items;
 		initialItems.forEach(x => x !== null && (x.key = uuid()));
-    
+
 		const initialTiles = selectedLevel.tiles;
-		LevelManager.setItems(initialItems, false);
 		LevelManager.setTiles(initialTiles, false);
+		LevelManager.setItems(initialItems, false);
 	}, []);
-  
+
 	useEffect(() => {
-    //levelContext?.updateLevelItems(initialItems);
+		//levelContext?.updateLevelItems(initialItems);
 		LevelManager.subscribeComboStart(onComboStart);
 		LevelManager.subscribeComboEnd(onComboEnd);
 
@@ -41,9 +43,11 @@ const LevelContainer = () => {
 
 	return (
 		<section className="grow aspect-square rounded-lg overflow-hidden relative select-none" ref={levelGridElement}>
-      <LevelManagerC></LevelManagerC>
+			<LevelManagerC></LevelManagerC>
 			<TileGrid></TileGrid>
-			<ItemGrid></ItemGrid>
+			<DelayComponent delayMs={ANIMATION_TIME_MS}>
+				<ItemGrid></ItemGrid>
+			</DelayComponent>
 		</section>
 	);
 };

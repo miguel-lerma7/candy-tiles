@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useRecoilCallback, useRecoilState, useRecoilValue } from 'recoil';
 import { ANIMATION_TIME_MS } from '../../../../config';
 import { levelList } from '../../../../data/level-layouts';
@@ -16,7 +16,7 @@ const fusionMatchSound = new Audio(fusionMatchSFX);
 
 const playMatchSFX = (combo?: number): void => {
 	matchSound.play();
-	matchSound.playbackRate < 2 && (matchSound.playbackRate *= 1.1);
+	//matchSound.playbackRate < 2 && (matchSound.playbackRate *= 1.1);
 };
 
 const applyMatches = (levelItems: readonly LevelItem[], matchList: readonly MatchDetail[]): LevelItem[] => {
@@ -42,18 +42,19 @@ const LevelManagerC = () => {
 	const checkingForMatches = useRef(false);
 
 	useEffect(() => {
-		setLevelItems(levelList[0].items);
 		setLevelTiles(levelList[0].tiles);
+		setLevelItems(levelList[0].items);
+		levelList[0].items.forEach((x, index) => updateRenderedLevelItem(index, x));
 	}, []);
 
 	useEffect(() => swapItems(false), [swappedItems]);
-	useEffect(() => {
+	/* useEffect(() => {
 		if (checkingForMatches.current) return;
 
 		setTimeout(() => {
 			checkForMatches();
 		}, ANIMATION_TIME_MS);
-	}, [levelItems]);
+	}, [levelItems]); */
 
 	const swapItems = (undo: boolean) => {
 		if (swappedItems.some(x => x === null)) return;
@@ -65,49 +66,50 @@ const LevelManagerC = () => {
 		const secondItem = structuredClone(levelItems[secondIndex]) as LevelItem;
 
 		const newLevelItems = structuredClone(levelItems) as LevelItem[];
-		newLevelItems[firstIndex] = secondItem;
-		newLevelItems[secondIndex] = firstItem;
+		newLevelItems[firstIndex] = undo ? firstItem : secondItem;
+		newLevelItems[secondIndex] = undo ? secondItem : firstItem;
 
-		undo
-			? setTimeout(() => {
-					setSwappedItems([null, null]);
-					setLevelItems(newLevelItems);
-			  }, ANIMATION_TIME_MS)
-			: setLevelItems(newLevelItems);
+		if (undo) {
+			setTimeout(() => {
+				setSwappedItems([null, null]);
+				console.log(newLevelItems);
+
+				setLevelItems(newLevelItems);
+			}, ANIMATION_TIME_MS);
+			return;
+		}
+
+		setLevelItems(newLevelItems);
+		setTimeout(() => checkForMatches(newLevelItems, true), ANIMATION_TIME_MS);
 	};
 
-	const checkForMatches = async () => {
+	const checkForMatches = async (itemList: LevelItem[], checkSwap: boolean): Promise<void> => {
 		checkingForMatches.current = true;
-		const matchResult = checkForMatchings(levelItems);
+		const matchInfo = checkForMatchings(itemList);
 
-		if (matchResult.thereWereMatches || !allTilesFilled(levelItems, levelTiles)) {
+		if (matchInfo.thereWereMatches || !allTilesFilled(itemList, levelTiles)) {
+			setSwappedItems([null, null]);
 			//this._levelData.comboCount += 1;
-			const newLevelItems = applyMatches(levelItems, matchResult.matchingList);
-			setLevelItems(newLevelItems);
+			const matchResult = applyMatches(itemList, matchInfo.matchingList);
+			setLevelItems(matchResult);
 			playMatchSFX();
-			//this._levelData.matchResult.matchingList = [];
-			//this._levelData.matchResult.thereWereMatches = false;
 			await delay(ANIMATION_TIME_MS);
-			newLevelItems.forEach((x, index) => updateRenderedLevelItem(index, x)); //NOTIFY RERENDER
-
+			const repositionResult = repositionItems(matchResult, levelTiles).repositionedItems;
+			setLevelItems(repositionResult);
 			await delay(ANIMATION_TIME_MS);
-			const repositionedItems = repositionItems(newLevelItems, levelTiles).repositionedItems;
-			setLevelItems(repositionedItems);
-
+			repositionResult.forEach((x, index) => updateRenderedLevelItem(index, x));
 			await delay(ANIMATION_TIME_MS);
-			//fillEmtyTiles
-			const newerLevelItems = generateNewCandies(repositionedItems, levelTiles);
-			setLevelItems(generateNewCandies(levelItems, levelTiles));
-			newerLevelItems.forEach((x, index) => updateRenderedLevelItem(index, x)); //NOTIFY RERENDER
-
+			const fillResult = generateNewCandies(repositionResult, levelTiles);
+			setLevelItems(fillResult);
+			fillResult.forEach((x, index) => updateRenderedLevelItem(index, x)); //NOTIFY RERENDER
 			await delay(ANIMATION_TIME_MS);
-			//checkForMatches();
-
+			checkingForMatches.current = false;
+			checkForMatches(fillResult, false);
 			return;
 		}
 
 		const thereAreSwappedItems = swappedItems.every(x => x !== null);
-		thereAreSwappedItems && swapItems(true);
+		thereAreSwappedItems && checkSwap && swapItems(true);
 
 		checkingForMatches.current = false;
 	};
