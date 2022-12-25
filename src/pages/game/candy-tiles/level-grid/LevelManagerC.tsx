@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useRecoilCallback, useRecoilState, useRecoilValue } from 'recoil';
+import { useEffect, useRef } from 'react';
+import { useRecoilState } from 'recoil';
 import { ANIMATION_TIME_MS } from '../../../../config';
 import { levelList } from '../../../../data/level-layouts';
 import { allTilesFilled, checkForMatchings, generateNewCandies, repositionItems } from '../../../../game-algorithms/tile-matching';
@@ -8,14 +8,15 @@ import { levelTilesState } from '../../../../recoil/atoms/levelTiles';
 import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
 import matchSFX from './../../../../assets/audio/match.mp3';
 import fusionMatchSFX from './../../../../assets/audio/fusionMatch.mp3';
-import { renderedLevelItemsState } from '../../../../recoil/atoms/renderedLevelItems';
 import { delay } from '../../../../utils/delay';
 
 const matchSound = new Audio(matchSFX);
 const fusionMatchSound = new Audio(fusionMatchSFX);
 
 const playMatchSFX = (combo?: number): void => {
+	matchSound.currentTime = 0;
 	matchSound.play();
+	matchSound.preservesPitch = false;
 	//matchSound.playbackRate < 2 && (matchSound.playbackRate *= 1.1);
 };
 
@@ -35,26 +36,15 @@ const LevelManagerC = () => {
 	const [swappedItems, setSwappedItems] = useRecoilState(swappedItemsState);
 	const [levelItems, setLevelItems] = useRecoilState(levelItemsState);
 	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
-	const updateRenderedLevelItem = useRecoilCallback(({ set }) => (levelItemIndex: number, newLevelItem: LevelItem) => {
-		set(renderedLevelItemsState(levelItemIndex), newLevelItem);
-	});
 
 	const checkingForMatches = useRef(false);
 
 	useEffect(() => {
 		setLevelTiles(levelList[0].tiles);
 		setLevelItems(levelList[0].items);
-		levelList[0].items.forEach((x, index) => updateRenderedLevelItem(index, x));
 	}, []);
 
 	useEffect(() => swapItems(false), [swappedItems]);
-	/* useEffect(() => {
-		if (checkingForMatches.current) return;
-
-		setTimeout(() => {
-			checkForMatches();
-		}, ANIMATION_TIME_MS);
-	}, [levelItems]); */
 
 	const swapItems = (undo: boolean) => {
 		if (swappedItems.some(x => x === null)) return;
@@ -72,8 +62,6 @@ const LevelManagerC = () => {
 		if (undo) {
 			setTimeout(() => {
 				setSwappedItems([null, null]);
-				console.log(newLevelItems);
-
 				setLevelItems(newLevelItems);
 			}, ANIMATION_TIME_MS);
 			return;
@@ -95,13 +83,10 @@ const LevelManagerC = () => {
 			playMatchSFX();
 			await delay(ANIMATION_TIME_MS);
 			const repositionResult = repositionItems(matchResult, levelTiles).repositionedItems;
-			setLevelItems(repositionResult);
-			await delay(ANIMATION_TIME_MS);
-			repositionResult.forEach((x, index) => updateRenderedLevelItem(index, x));
-			await delay(ANIMATION_TIME_MS);
+			//setLevelItems(repositionResult);
+			//await delay(ANIMATION_TIME_MS);
 			const fillResult = generateNewCandies(repositionResult, levelTiles);
 			setLevelItems(fillResult);
-			fillResult.forEach((x, index) => updateRenderedLevelItem(index, x)); //NOTIFY RERENDER
 			await delay(ANIMATION_TIME_MS);
 			checkingForMatches.current = false;
 			checkForMatches(fillResult, false);

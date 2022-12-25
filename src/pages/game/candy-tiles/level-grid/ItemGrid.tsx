@@ -2,6 +2,8 @@ import { TILE_COUNT } from '../../../../config';
 import { levelList } from '../../../../data/level-layouts';
 import LevelItem from './LevelItem';
 
+export let liveItemsIds: string[] = [];
+
 const ItemGrid = () => {
 	const tilesLayout = levelList[0].tiles;
 

@@ -4,10 +4,9 @@ import yellow from './../../../../../assets/candies/yellow.png';
 import green from './../../../../../assets/candies/green.png';
 import blue from './../../../../../assets/candies/blue.png';
 import purple from './../../../../../assets/candies/purple.png';
-import { HtmlHTMLAttributes, useEffect, useRef, useState } from 'react';
-import useFirstRender from '../../../../../hooks/useFirstRender';
+import candyBounceSFX from './../../../../../assets/audio/candyBounce.mp3';
+import { useEffect, useRef, useState } from 'react';
 import LevelItemFX from '../items-fx/LevelItemFX';
-import levelManager from '../level-manager';
 import { useRecoilValue } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
@@ -25,8 +24,6 @@ const candyImages: { [key: string]: string } = {
 export const CandyColors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 
 const animateItemSpawn = (element: HTMLElement): void => {
-	console.log('should animtate');
-
 	gsap.fromTo(
 		element,
 		{
@@ -41,6 +38,9 @@ const animateItemSpawn = (element: HTMLElement): void => {
 			ease: 'bounce.out',
 		}
 	);
+	const candyBounceAudio = new Audio(candyBounceSFX);
+	candyBounceAudio.volume = 0.15;
+	candyBounceAudio.play();
 };
 
 type CandyProps = {
@@ -52,18 +52,12 @@ type CandyProps = {
 const Candy = ({ color, initialIndex, id }: CandyProps) => {
 	const [showFX, setShowFX] = useState(false);
 	const indexRef = useRef(initialIndex);
-	const firstRender = useFirstRender();
 	const levelItems = useRecoilValue(levelItemsState);
 	const elementRef = useRef<HTMLElement | null>(null);
 
-	useEffectAfterFirstRender(() => {
+	useEffect(() => {
 		animateItemSpawn(elementRef.current as HTMLElement);
 	}, []);
-
-  useEffect(() => {
-    initialIndex === 34 && console.log(initialIndex);
-    
-  })
 
 	useEffect(() => {
 		indexRef.current = initialIndex;
