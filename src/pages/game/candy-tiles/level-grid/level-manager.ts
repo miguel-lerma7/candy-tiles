@@ -2,7 +2,7 @@ import { delay } from "../../../../utils/delay";
 import { checkForMatchings, generateNewCandies, repositionItems, allTilesFilled } from "../../../../game-algorithms/tile-matching";
 import matchSFX from './../../../../assets/audio/match.mp3';
 import fusionMatchSFX from './../../../../assets/audio/fusionMatch.mp3';
-import { tryGetLevelItemByFusion } from "../../../../game-algorithms/candy-fusions";
+import { getLevelItemByFusion } from "../../../../game-algorithms/candy-fusions";
 import { ANIMATION_TIME_MS } from "../../../../config";
 
 const DEFAULT_SWAPPED_CANDY_COLOR = "Red";
@@ -20,7 +20,7 @@ class LevelManager {
     previousItems: '',
     items: [],
     tiles: [],
-    matchResult: { matchingList: [], thereWereMatches: false },
+    matchResult: { matchingList: [], thereWereMatches: false, matchingGroups: [] },
     actionsLocked: false,
     comboCount: 1,
     swappedItems: [null, null],
@@ -152,7 +152,7 @@ class LevelManager {
   private checkSwapFusions = (): void => {
     this._levelData.matchResult.matchingList.filter(x => x.matched).forEach(match => {
       const itemWasSwapped = this._levelData.swappedItems.includes(match.index);
-      const fusionItem = tryGetLevelItemByFusion(match, this._levelData.items[match.index]);
+      const fusionItem = getLevelItemByFusion(match, this._levelData.items[match.index]);
       const canFuse = itemWasSwapped && this._levelData.comboCount === 1;
 
       this._levelData.items[match.index] = canFuse ? fusionItem : null;

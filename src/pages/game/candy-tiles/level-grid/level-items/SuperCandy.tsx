@@ -10,6 +10,8 @@ import useFirstRender from '../../../../../hooks/useFirstRender';
 import levelManager from '../level-manager';
 import { getHorizontalAndVerticalItems } from '../../../../../game-algorithms/tile-matching';
 import LevelItemFX from '../items-fx/LevelItemFX';
+import { useRecoilValue } from 'recoil';
+import { swappedItemsState } from '../../../../../recoil/atoms/swappedItems';
 
 const candyImages: { [key: string]: string } = {
 	'Red': superRed,
@@ -36,6 +38,7 @@ const SuperCandy = ({ color, initialIndex, id }: SuperCandyProps) => {
 	const firstRender = useFirstRender();
 	const indexRef = useRef(initialIndex);
 	const itemUsedRef = useRef(false);
+  const swappedItems = useRecoilValue(swappedItemsState);
 
 	useEffect(() => {
 		firstRender && setScale(1);

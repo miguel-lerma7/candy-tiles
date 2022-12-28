@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useRecoilState } from 'recoil';
 import { ANIMATION_TIME_MS } from '../../../../config';
 import { levelList } from '../../../../data/level-layouts';
@@ -9,27 +9,33 @@ import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
 import matchSFX from './../../../../assets/audio/match.mp3';
 import fusionMatchSFX from './../../../../assets/audio/fusionMatch.mp3';
 import { delay } from '../../../../utils/delay';
+import { flushSync } from 'react-dom';
+import { getLevelItemByFusion } from '../../../../game-algorithms/candy-fusions';
 
 const matchSound = new Audio(matchSFX);
 const fusionMatchSound = new Audio(fusionMatchSFX);
 
-const playMatchSFX = (combo?: number): void => {
+export let comboCount = 0;
+
+const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[] => {
+	const newItemList = structuredClone(itemList) as LevelItem[];
+	const matchGroupsCenters = matchInfo.matchingGroups.map(x => x[Math.floor(x.length / 2)]);
+	matchInfo.matchingList
+		.filter(x => x.matched)
+		.forEach(y => {
+			const itemIsAtMatchGroupCenter = matchGroupsCenters.includes(y.index);
+			newItemList[y.index] = itemIsAtMatchGroupCenter ? getLevelItemByFusion(y, newItemList[y.index]) : null;
+			const itemWasFused = newItemList[y.index] !== null;
+			itemWasFused && fusionMatchSound.play();
+		});
+	return newItemList;
+};
+
+const playMatchSFX = (): void => {
+	matchSound.playbackRate = 1 + comboCount / 10;
 	matchSound.currentTime = 0;
 	matchSound.play();
 	matchSound.preservesPitch = false;
-	//matchSound.playbackRate < 2 && (matchSound.playbackRate *= 1.1);
-};
-
-const applyMatches = (levelItems: readonly LevelItem[], matchList: readonly MatchDetail[]): LevelItem[] => {
-	const newLevelItems = structuredClone(levelItems) as LevelItem[];
-	matchList
-		.filter(x => x.matched)
-		.forEach(match => {
-			//TODO: CHECK FOR FUSION
-			newLevelItems[match.index] = null;
-			//IF FUSION => fusionMatchSound.play();
-		});
-	return newLevelItems;
 };
 
 const LevelManagerC = () => {
@@ -77,14 +83,12 @@ const LevelManagerC = () => {
 
 		if (matchInfo.thereWereMatches || !allTilesFilled(itemList, levelTiles)) {
 			setSwappedItems([null, null]);
-			//this._levelData.comboCount += 1;
-			const matchResult = applyMatches(itemList, matchInfo.matchingList);
-			setLevelItems(matchResult);
 			playMatchSFX();
+			comboCount += 1;
+			const matchResult = applyMatches(matchInfo, itemList);
+			setLevelItems(matchResult);
 			await delay(ANIMATION_TIME_MS);
 			const repositionResult = repositionItems(matchResult, levelTiles).repositionedItems;
-			//setLevelItems(repositionResult);
-			//await delay(ANIMATION_TIME_MS);
 			const fillResult = generateNewCandies(repositionResult, levelTiles);
 			setLevelItems(fillResult);
 			await delay(ANIMATION_TIME_MS);
@@ -97,6 +101,7 @@ const LevelManagerC = () => {
 		thereAreSwappedItems && checkSwap && swapItems(true);
 
 		checkingForMatches.current = false;
+		comboCount = 0;
 	};
 
 	return <></>;

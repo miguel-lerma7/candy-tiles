@@ -1,17 +1,17 @@
 import uuid from "react-uuid";
 
-export const tryGetLevelItemByFusion = (matchDetail: MatchDetail, previousItem: LevelItem): LevelItem => {
+export const getLevelItemByFusion = (matchDetail: MatchDetail, itemToFuse: LevelItem): LevelItem => {
   let item: LevelItem = null;
 
-  const previousItemWasACandy = previousItem?.type === "Candy" || previousItem?.type === "SuperCandy";
-  if (!previousItemWasACandy) return null;
+  const itemIsACandy = itemToFuse?.type === "Candy" || itemToFuse?.type === "SuperCandy";
+  if (!itemIsACandy) return null;
 
   const superCandyFusion = (matchDetail.left + matchDetail.right) > 2 || (matchDetail.down + matchDetail.up) > 2;
   const chocolateFusion = [matchDetail.up, matchDetail.left, matchDetail.right, matchDetail.down].filter(x => x > 1).reduce((acc, curr) => acc + curr, 0) > 3;
 
   if (superCandyFusion) {
     item = {
-      color: previousItem?.color,
+      color: itemToFuse?.color,
       type: "SuperCandy",
       key: uuid()
     } as SuperCandy;

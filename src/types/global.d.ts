@@ -31,9 +31,12 @@ declare global {
     up: number, right: number, down: number, left: number, index: number, matched: boolean
   };
 
+  type MatchGroup = number[];
+
   type MatchResult = {
     thereWereMatches: boolean,
-    matchingList: MatchDetail[]
+    matchingList: MatchDetail[],
+    matchingGroups: MatchGroup[]
   };
 
   type LevelRuntimeData = {

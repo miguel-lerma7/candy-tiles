@@ -59,18 +59,41 @@ const getCandyMatchings = (candy: CandyInLevel, items: readonly LevelItem[]): Ma
   const left = matchings.left.count;
   const matched = (up > 0 && down > 0) || (left > 0 && right > 0) || [up, down, left, right].some(x => x > 1);
 
+
   return { up, right, down, left, matched, index: candy.index };
 };
 
 const candyTypesArray = ["Candy", "SuperCandy"];
+
+const getMatchGroups = (matchList: MatchDetail[], itemsList: readonly LevelItem[]): MatchGroup[] => {
+  const matchedCandyList = matchList.filter(x => x.matched && candyTypesArray.includes(itemsList[x.index]?.type || ""));
+  const groups = matchedCandyList.reduce((prev, curr) => {
+    if (prev.length === 0) {
+      prev.push([curr.index]);
+      return prev;
+    }
+
+    const candyColor = (itemsList[curr.index] as Candy).color;
+    const sameColor = (other: number): boolean => (itemsList[other] as Candy).color === candyColor;
+    const group = prev.findIndex(x => x.some(y => tilesAreAdjacent(curr.index, y) && sameColor(y)));
+    const validGroup = group >= 0;
+    validGroup ? prev[group].push(curr.index) : prev.push([curr.index]);
+    return prev;
+  }, [] as MatchGroup[]) as MatchGroup[];
+
+  return groups;
+};
+
 export const checkForMatchings = (items: readonly LevelItem[]): MatchResult => {
   const candies = [...structuredClone(items)].map((x, index) => ({ ...x, index })).filter(x => candyTypesArray.includes((x as LevelItem)?.type || "")) as CandyInLevel[];
-  const candyMatchings: ({ index: number } & MatchDetail)[] = [];
-  candies.forEach(candy => candyMatchings.push(getCandyMatchings(candy, items)));
+  const matchingList: MatchDetail[] = [];
+  candies.forEach(candy => matchingList.push(getCandyMatchings(candy, items)));
+  const matchingGroups = getMatchGroups(matchingList, items);
 
   return {
-    thereWereMatches: candyMatchings.some(x => x.matched),
-    matchingList: candyMatchings
+    thereWereMatches: matchingList.some(x => x.matched),
+    matchingList,
+    matchingGroups
   };
 };
 
