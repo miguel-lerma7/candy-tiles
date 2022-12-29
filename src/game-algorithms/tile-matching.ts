@@ -176,7 +176,7 @@ export const generateNewCandies = (items: readonly LevelItem[], tiles: readonly 
   return newCandies;
 };
 
-export const getHorizontalAndVerticalItems = (startIndex: number): (number | null)[] => {
+export const getHorizontalAndVerticalItems = (startIndex: number): number[] => {
   const rowIndex = Math.ceil((startIndex + 1) / ROW_NUMBER);
   const columnIndex = (startIndex + 1) - ((rowIndex - 1) * ROW_NUMBER);
 

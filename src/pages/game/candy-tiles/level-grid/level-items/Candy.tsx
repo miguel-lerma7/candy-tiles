@@ -40,7 +40,7 @@ const animateItemSpawn = (element: HTMLElement): void => {
 	);
 	const candyBounceAudio = new Audio(candyBounceSFX);
 	candyBounceAudio.volume = 0.15;
-	candyBounceAudio.play();
+	candyBounceAudio.play(); 
 };
 
 type CandyProps = {
