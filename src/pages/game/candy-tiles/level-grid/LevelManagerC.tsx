@@ -21,6 +21,8 @@ const matchSound = new Audio(matchSFX);
 const fusionMatchSound = new Audio(fusionMatchSFX);
 
 export let comboCount = 0;
+const DEFAULT_SWAPPED_CANDY_COLOR: CandyColor = 'Red';
+export let latestSwappedCandyColor: CandyColor = DEFAULT_SWAPPED_CANDY_COLOR;
 
 const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[] => {
 	let newItemList = structuredClone(itemList) as LevelItem[];
@@ -77,7 +79,7 @@ const LevelManagerC = () => {
 	const [levelItems, setLevelItems] = useRecoilState(levelItemsState);
 	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
 
-	const itemsJustSwapped = useRef(false);
+	const itemsWereSwapped = useRef(false);
 
 	useEffect(() => {
 		setLevelTiles(levelList[0].tiles);
@@ -88,7 +90,7 @@ const LevelManagerC = () => {
 
 	const swapItems = (undo: boolean) => {
 		if (swappedItems.some(x => x === null)) return;
-		itemsJustSwapped.current = true;
+		itemsWereSwapped.current = true;
 
 		const firstIndex = swappedItems[0] || -1;
 		const secondIndex = swappedItems[1] || -1;
@@ -103,6 +105,7 @@ const LevelManagerC = () => {
 		if (undo) {
 			setTimeout(() => {
 				setSwappedItems([null, null]);
+				itemsWereSwapped.current = false;
 				setLevelItems(newLevelItems);
 			}, ANIMATION_TIME_MS);
 			return;
@@ -118,7 +121,7 @@ const LevelManagerC = () => {
 
 		if (matchInfo.thereWereMatches || !allTilesFilled(itemList, levelTiles)) {
 			setSwappedItems([null, null]);
-			itemsJustSwapped.current = false;
+			itemsWereSwapped.current = false;
 			playMatchSFX();
 			comboCount += 1;
 			const matchResult = applyMatches(matchInfo, itemList);
@@ -140,17 +143,25 @@ const LevelManagerC = () => {
 
 	const checkChocolateSwap = (matchInfo: MatchResult, itemList: LevelItem[]): MatchResult => {
 		const swappedChocolateIndex = itemList.findIndex((x, i) => swappedItems.includes(i) && x?.type === 'Chocolate');
-		if (swappedChocolateIndex < 0 || !itemsJustSwapped.current) return matchInfo;
+		const otherItemSwapIndex = swappedItems.find(x => x !== swappedChocolateIndex);
+		const otherItem = itemList.find((x, i) => i === otherItemSwapIndex);
+
+		if (swappedChocolateIndex < 0 || !itemsWereSwapped.current || otherItem?.type === 'Chocolate') return matchInfo;
 
 		const otherItemIndex = swappedItems.find(x => x === swappedChocolateIndex);
-		const otherItemColor = (levelItems[otherItemIndex!] as Candy).color || 'Red';
+		const otherItemColor: CandyColor = (levelItems[otherItemIndex!] as Candy).color || DEFAULT_SWAPPED_CANDY_COLOR;
+		latestSwappedCandyColor = otherItemColor;
 
 		matchInfo.matchingList = matchInfo.matchingList.map(matchDetail => {
 			(levelItems[matchDetail.index] as Candy).color === otherItemColor && (matchDetail.matched = true);
 			return matchDetail;
 		});
 
-		matchInfo.matchingList.push({ index: swappedChocolateIndex, matched: true, down: 0, left: 0, right: 0, up: 0 });
+		const matchProps = { down: 0, left: 0, right: 0, up: 0 };
+		matchInfo.matchingList.push(
+			{ index: swappedChocolateIndex, matched: true, ...matchProps },
+			{ index: otherItemIndex!, matched: true, ...matchProps }
+		);
 		matchInfo.thereWereMatches = matchInfo.matchingList.some(x => x.matched);
 
 		return matchInfo;

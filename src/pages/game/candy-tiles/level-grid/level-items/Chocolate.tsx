@@ -1,13 +1,11 @@
 import chocolateSprite from './../../../../../assets/candies/chocolate.png';
 import { useEffect, useRef, useState } from 'react';
-import useFirstRender from '../../../../../hooks/useFirstRender';
-import LevelManager from '../level-manager';
 import chocolateMatchSFX from './../../../../../assets/audio/chocolateMatch.mp3';
 import LevelItemFX from '../items-fx/LevelItemFX';
-import levelManager from '../level-manager';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
 import { useRecoilValue } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
+import { latestSwappedCandyColor } from '../LevelManagerC';
 
 type ChocolateProps = {
 	initialIndex: number;
@@ -39,7 +37,7 @@ const Chocolate = ({ initialIndex, id }: ChocolateProps) => {
 	}, [levelItems]);
 
 	return showFX ? (
-		<LevelItemFX color={LevelManager.levelData.latestSwappedCandyColor as CandyColor} maskSrc="/img/fx/triangleShape.png"></LevelItemFX>
+		<LevelItemFX color={latestSwappedCandyColor} maskSrc="/img/fx/triangleShape.png"></LevelItemFX>
 	) : (
 		<img
 			data-chocolate
