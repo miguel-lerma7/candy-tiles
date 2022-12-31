@@ -2,13 +2,13 @@ import { TILE_COUNT } from '../../../../config';
 import { levelList } from '../../../../data/level-layouts';
 import LevelItem from './LevelItem';
 
-export let liveItemsIds: string[] = [];
+export const liveItemsIds: string[] = [];
 
 const ItemGrid = () => {
 	const tilesLayout = levelList[0].tiles;
 
 	return (
-		<div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+		<div className='absolute top-0 left-0 w-full h-full pointer-events-none'>
 			{Array(TILE_COUNT)
 				.fill('')
 				.map((x, index) => {

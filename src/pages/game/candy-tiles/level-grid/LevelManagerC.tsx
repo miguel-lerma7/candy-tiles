@@ -25,7 +25,7 @@ const DEFAULT_SWAPPED_CANDY_COLOR: CandyColor = 'Red';
 export let latestSwappedCandyColor: CandyColor = DEFAULT_SWAPPED_CANDY_COLOR;
 
 const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[] => {
-	let newItemList = structuredClone(itemList) as LevelItem[];
+	const newItemList = structuredClone(itemList) as LevelItem[];
 	matchInfo.matchingList = applySuperCandyEffects(matchInfo.matchingList, newItemList);
 	const matchGroupsCenters = matchInfo.matchingGroups.map(x => x[Math.floor(x.length / 2)]);
 	matchInfo.matchingList
@@ -148,8 +148,8 @@ const LevelManagerC = () => {
 
 		if (swappedChocolateIndex < 0 || !itemsWereSwapped.current || otherItem?.type === 'Chocolate') return matchInfo;
 
-		const otherItemIndex = swappedItems.find(x => x === swappedChocolateIndex);
-		const otherItemColor: CandyColor = (levelItems[otherItemIndex!] as Candy).color || DEFAULT_SWAPPED_CANDY_COLOR;
+		const otherItemIndex = swappedItems.find(x => x !== swappedChocolateIndex);
+		const otherItemColor: CandyColor = (levelItems[swappedChocolateIndex] as Candy).color || DEFAULT_SWAPPED_CANDY_COLOR;
 		latestSwappedCandyColor = otherItemColor;
 
 		matchInfo.matchingList = matchInfo.matchingList.map(matchDetail => {
@@ -158,10 +158,9 @@ const LevelManagerC = () => {
 		});
 
 		const matchProps = { down: 0, left: 0, right: 0, up: 0 };
-		matchInfo.matchingList.push(
-			{ index: swappedChocolateIndex, matched: true, ...matchProps },
-			{ index: otherItemIndex!, matched: true, ...matchProps }
-		);
+		matchInfo.matchingList.push({ index: swappedChocolateIndex, matched: true, ...matchProps });
+		typeof otherItemIndex === 'number' && matchInfo.matchingList.push({ index: otherItemIndex, matched: true, ...matchProps });
+
 		matchInfo.thereWereMatches = matchInfo.matchingList.some(x => x.matched);
 
 		return matchInfo;

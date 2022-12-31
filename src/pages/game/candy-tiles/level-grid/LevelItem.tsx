@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { ANIMATION_TIME_SECONS, COLUMN_NUMBER } from '../../../../config';
+import { ANIMATION_TIME_MS, ANIMATION_TIME_SECONS, COLUMN_NUMBER } from '../../../../config';
 import { getItemColumnIndex, getItemRowIndex } from '../../../../game-algorithms/tile-matching';
 import useEffectAfterFirstRender from '../../../../hooks/useEffectAfterFirstRender';
 import { levelItemsState } from '../../../../recoil/atoms/levelItems';
 import Candy from './level-items/Candy';
 import Chocolate from './level-items/Chocolate';
 import SuperCandy from './level-items/SuperCandy';
-import gsap from 'gsap';
 import { liveItemsIds } from './ItemGrid';
+import anime from 'animejs';
 
 type ItemPosition = {
 	x: number;
@@ -37,24 +37,22 @@ const getItemComponent = (item: LevelItem | null, itemIndex: number): JSX.Elemen
 };
 
 const setPosition = (element: HTMLElement, index: number): void => {
-	gsap.fromTo(
-		element,
-		{},
-		{
-			xPercent: 100 * (getItemColumnIndex(index) - 1),
-			yPercent: 100 * (getItemRowIndex(index) - 1),
-			duration: 0,
-			overwrite: true,
-		}
-	);
+	anime.remove(element);
+	anime({
+		targets: element,
+		translateX: `${100 * (getItemColumnIndex(index) - 1)}%`,
+		translateY: `${100 * (getItemRowIndex(index) - 1)}%`,
+		duration: 0,
+	});
 };
 
 const animatePosition = (element: HTMLElement, position: ItemPosition): void => {
-	gsap.to(element, {
-		xPercent: position.x,
-		yPercent: position.y,
-		duration: ANIMATION_TIME_SECONS,
-		ease: 'back.out(1.5)',
+	anime({
+		targets: element,
+		translateX: `${position.x}%`,
+		translateY: `${position.y}%`,
+		duration: ANIMATION_TIME_MS,
+		easing: 'easeOutBack',
 	});
 };
 
@@ -81,7 +79,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	}, [levelItems]);
 
 	useEffect(() => {
-		if (!!levelItemTarget) {
+		if (levelItemTarget) {
 			setPosition(elementRef.current as HTMLElement, getItemIndex());
 		}
 	}, [levelItemTarget]);
@@ -125,7 +123,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 
 	return (
 		<div
-			className={`p-[1.7%] aspect-square block absolute`}
+			className={'p-[1.7%] aspect-square block absolute'}
 			style={{
 				width: `calc(100%/${COLUMN_NUMBER})`,
 				animationDuration: 'none',

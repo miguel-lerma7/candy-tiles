@@ -57,7 +57,7 @@ const TileGrid = () => {
 		tileClickAudio.current.play();
 	};
 
-	const handleMouseUp = (e: React.MouseEvent): void => {
+	const handleMouseUp = (): void => {
 		firstTile.current = null;
 		dragging.current = false;
 	};
@@ -70,11 +70,11 @@ const TileGrid = () => {
 
 		if (!tilesAreAdjacent(firstTileIndex, secondTileIndex)) {
 			levelContext?.updateSelectedTiles([null, null]);
-      setSwappedItems([null, null]);
+			setSwappedItems([null, null]);
 			return;
 		}
-    
-    setSwappedItems([firstTileIndex, secondTileIndex]);
+
+		setSwappedItems([firstTileIndex, secondTileIndex]);
 		//LevelManager.swapItems([firstTileIndex, secondTileIndex]);
 
 		firstTile.current = null;
@@ -82,7 +82,7 @@ const TileGrid = () => {
 
 	return (
 		<div
-			className="grid absolute top-0 left-0 w-full h-full"
+			className='grid absolute top-0 left-0 w-full h-full'
 			style={{ gridTemplateColumns: `repeat(${COLUMN_NUMBER}, 1fr)`, gridTemplateRows: `repeat(${ROW_NUMBER}, 1fr)` }}
 			onMouseDown={handleMouseDown}
 			onMouseUp={handleMouseUp}

@@ -1,6 +1,6 @@
-import { atom } from "recoil";
+import { atom } from 'recoil';
 
 export const levelTilesState = atom({
-  key: "levelTiles",
-  default: [] as LevelTile[]
-})
+	key: 'levelTiles',
+	default: [] as LevelTile[],
+});

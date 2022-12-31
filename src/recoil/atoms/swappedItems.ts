@@ -1,7 +1,6 @@
-import { atom } from "recoil";
-
+import { atom } from 'recoil';
 
 export const swappedItemsState = atom({
-  key: "swappedItems",
-  default: [null, null] as SwappedItems
-})
+	key: 'swappedItems',
+	default: [null, null] as SwappedItems,
+});

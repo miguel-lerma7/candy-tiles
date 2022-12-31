@@ -1,4 +1,3 @@
-import { useMemo, useRef, useState } from 'react';
 
 export type TileProps = {
 	index: number;

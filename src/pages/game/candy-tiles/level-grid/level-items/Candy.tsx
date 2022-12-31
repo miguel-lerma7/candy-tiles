@@ -10,7 +10,8 @@ import LevelItemFX from '../items-fx/LevelItemFX';
 import { useRecoilValue } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
-import gsap from 'gsap';
+import anime from 'animejs';
+import { ANIMATION_TIME_MS } from '../../../../../config';
 
 const candyImages: { [key: string]: string } = {
 	'Red': red,
@@ -24,23 +25,17 @@ const candyImages: { [key: string]: string } = {
 export const CandyColors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 
 const animateItemSpawn = (element: HTMLElement): void => {
-	gsap.fromTo(
-		element,
-		{
-			x: 0,
-			y: 0,
-			xPercent: 0,
-			yPercent: -500,
-		},
-		{
-			yPercent: 0,
-			duration: 0.75,
-			ease: 'bounce.out',
-		}
-	);
+	anime({
+		targets: element,
+		translateX: [0, 0],
+		translateY: ['-500%', '0%'],
+		duration: 750,
+		easing: 'easeOutBounce',
+	});
+
 	const candyBounceAudio = new Audio(candyBounceSFX);
 	candyBounceAudio.volume = 0.15;
-	candyBounceAudio.play(); 
+	candyBounceAudio.play();
 };
 
 type CandyProps = {
@@ -73,15 +68,15 @@ const Candy = ({ color, initialIndex, id }: CandyProps) => {
 	}, [levelItems]);
 
 	return (
-		<span className="relative w-full h-full block" ref={elementRef}>
+		<span className='relative w-full h-full block' ref={elementRef}>
 			{showFX ? (
-				<LevelItemFX color={color} maskSrc="/img/fx/doughnutShape.png"></LevelItemFX>
+				<LevelItemFX color={color} maskSrc='/img/fx/doughnutShape.png'></LevelItemFX>
 			) : (
 				<img
 					data-candy
 					data-color={color}
 					src={candyImages[color]}
-					className="block w-full h-full m-0 select-none pointer-events-none relative"
+					className='block w-full h-full m-0 select-none pointer-events-none relative'
 				></img>
 			)}
 		</span>

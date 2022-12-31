@@ -6,6 +6,7 @@ import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstR
 import { useRecoilValue } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import { latestSwappedCandyColor } from '../LevelManagerC';
+import anime from 'animejs';
 
 type ChocolateProps = {
 	initialIndex: number;
@@ -15,14 +16,29 @@ type ChocolateProps = {
 const chocolateMatchSound = new Audio(chocolateMatchSFX);
 chocolateMatchSound.volume = 0.5;
 
+const animateItemSpawn = (element: HTMLElement): void => {
+	console.log(element);
+
+	anime({
+		targets: element,
+		scale: [0, 2, 1],
+		rotate: [360, 0],
+		easing: 'easeOutBack',
+		duration: 500,
+	});
+};
+
 const Chocolate = ({ initialIndex, id }: ChocolateProps) => {
-	const [scale, setScale] = useState(0);
+	const [scale] = useState(0);
 	const [showFX, setShowFX] = useState(false);
 	const indexRef = useRef(initialIndex);
 	const itemUsedRef = useRef(false);
 	const levelItems = useRecoilValue(levelItemsState);
+	const elementRef = useRef<HTMLImageElement | null>(null);
 
-	useEffect(() => {}, []);
+	useEffect(() => {
+		animateItemSpawn(elementRef.current as HTMLElement);
+	}, []);
 
 	useEffect(() => {
 		indexRef.current = initialIndex;
@@ -37,12 +53,13 @@ const Chocolate = ({ initialIndex, id }: ChocolateProps) => {
 	}, [levelItems]);
 
 	return showFX ? (
-		<LevelItemFX color={latestSwappedCandyColor} maskSrc="/img/fx/triangleShape.png"></LevelItemFX>
+		<LevelItemFX color={latestSwappedCandyColor} maskSrc='/img/fx/triangleShape.png'></LevelItemFX>
 	) : (
 		<img
 			data-chocolate
+			ref={elementRef}
 			src={chocolateSprite}
-			className="block w-full h-full m-0 select-none pointer-events-none duration-200 animate-[scaleOscillate_0.3s_infinite_alternate]"
+			className='block w-full h-full m-0 select-none pointer-events-none duration-200'
 			style={{
 				transform: `scale(${scale})`,
 			}}

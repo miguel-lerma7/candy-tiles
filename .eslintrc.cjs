@@ -1,12 +1,18 @@
 module.exports = {
 	'env': {
 		'browser': true,
-		'es2021': true,
 		'node': true,
+		'es2021': true,
 	},
-	'extends': ['eslint:recommended', 'plugin:react/recommended', 'plugin:@typescript-eslint/recommended'],
-	'overrides': [],
-	'files': ['**/*.ts', '**/*.tsx'],
+	'extends': ['eslint:recommended', 'plugin:react/recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
+	'overrides': [
+		{
+			'files': ['*.ts', '*.tsx'],
+			'extends': ['plugin:@typescript-eslint/eslint-recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
+			'parser': '@typescript-eslint/parser',
+			'plugins': ['@typescript-eslint'],
+		},
+	],
 	'parser': '@typescript-eslint/parser',
 	'parserOptions': {
 		'ecmaVersion': 'latest',
@@ -14,10 +20,14 @@ module.exports = {
 	},
 	'plugins': ['react', '@typescript-eslint'],
 	'rules': {
-		'indent': ['error', 'tab'],
-		'linebreak-style': 0,
+		'react/react-in-jsx-scope': 'off',
+		'linebreak-style': ['error', 'windows'],
 		'quotes': ['error', 'single'],
 		'semi': ['error', 'always'],
-		'react/react-in-jsx-scope': 'off',
+	},
+	'settings': {
+		'react': {
+			'version': 'detect',
+		},
 	},
 };

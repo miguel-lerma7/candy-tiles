@@ -8,9 +8,9 @@ import superCandyMatchSFX from './../../../../../assets/audio/superCandyMatch.mp
 import { useEffect, useRef, useState } from 'react';
 import LevelItemFX from '../items-fx/LevelItemFX';
 import { useRecoilValue } from 'recoil';
-import gsap from 'gsap';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
+import anime from 'animejs';
 
 const candyImages: { [key: string]: string } = {
 	'Red': superRed,
@@ -26,19 +26,13 @@ const superCandyMatchSound = new Audio(superCandyMatchSFX);
 export const CandyColors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 
 const animateItemSpawn = (element: HTMLElement): void => {
-	gsap.fromTo(
-		element,
-		{
-			scale: 0,
-			rotate: 180,
-		},
-		{
-			scale: 1,
-			duration: 0.75,
-			rotate: 0,
-			ease: 'back.out(1.7)',
-		}
-	);
+	anime({
+		targets: element,
+		scale: [0, 1],
+		rotate: [180, 0],
+		easing: 'easeOutBack',
+		duration: 750,
+	});
 };
 
 type SuperCandyProps = {
@@ -71,14 +65,14 @@ const SuperCandy = ({ color, initialIndex, id }: SuperCandyProps) => {
 	}, [levelItems]);
 
 	return showFX ? (
-		<LevelItemFX color={color} maskSrc="/img/fx/squareShape.png"></LevelItemFX>
+		<LevelItemFX color={color} maskSrc='/img/fx/squareShape.png'></LevelItemFX>
 	) : (
 		<img
 			ref={elementRef}
 			data-candy
 			data-color={color}
 			src={candyImages[color]}
-			className="block w-full h-full m-0 select-none pointer-events-none duration-200"
+			className='block w-full h-full m-0 select-none pointer-events-none duration-200'
 		></img>
 	);
 };

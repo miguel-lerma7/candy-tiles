@@ -1,5 +1,4 @@
-import { useContext, createContext, useState, useEffect, useRef } from 'react';
-import LevelManager from '../pages/game/candy-tiles/level-grid/level-manager';
+import { useContext, createContext, useState } from 'react';
 
 type TilePair = [number | null, number | null];
 
@@ -23,10 +22,9 @@ const LevelContextProvider = ({ children }: LevelContextProviderProps) => {
 	const updateSelectedTiles = (tilePair: TilePair): void => setSelectedTiles(tilePair);
 	const updateLevelItems = (items: LevelItem[]): void => setLevelItems(items);
 
-	useEffect(() => {
-	}, []);
+	//useEffect(() => {}, []);
 
-	const onItemsRerender = (items: LevelItem[]): void => setLevelItems(structuredClone(items));
+	//const onItemsRerender = (items: LevelItem[]): void => setLevelItems(structuredClone(items));
 
 	const providerValue: LevelData = {
 		selectedTiles,
