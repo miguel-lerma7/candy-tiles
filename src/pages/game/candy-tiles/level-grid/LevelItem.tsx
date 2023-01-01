@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { ANIMATION_TIME_MS, ANIMATION_TIME_SECONS, COLUMN_NUMBER } from '../../../../config';
+import { ANIMATION_TIME_MS, COLUMN_NUMBER } from '../../../../config';
 import { getItemColumnIndex, getItemRowIndex } from '../../../../game-algorithms/tile-matching';
 import useEffectAfterFirstRender from '../../../../hooks/useEffectAfterFirstRender';
 import { levelItemsState } from '../../../../recoil/atoms/levelItems';
@@ -9,6 +9,7 @@ import Chocolate from './level-items/Chocolate';
 import SuperCandy from './level-items/SuperCandy';
 import { liveItemsIds } from './ItemGrid';
 import anime from 'animejs';
+
 
 type ItemPosition = {
 	x: number;

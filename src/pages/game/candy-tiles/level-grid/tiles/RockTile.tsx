@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { checkForAdjacentMatch } from '../../../../../game-algorithms/tile-matching';
-import levelManager from '../level-manager';
 import { TileProps } from './Tile';
 import rockCrack1SFX from './../../../../../assets/audio/rockCrack1.mp3';
 import rockCrack2SFX from './../../../../../assets/audio/rockCrack2.mp3';
@@ -12,14 +11,14 @@ const RockTile = ({ index }: TileProps) => {
 	const [damaged, setDamaged] = useState(false);
 
 	useEffect(() => {
-		levelManager.subscribeItemsChange(onItemsChange);
+		/* levelManager.subscribeItemsChange(onItemsChange);
 		return () => {
 			levelManager.unsubscribeItemsChange(onItemsChange);
-		};
+		}; */
 	}, [damaged]);
 
 	const onItemsChange = (): void => {
-		const matched = checkForAdjacentMatch(index, levelManager.levelData.matchResult.matchingList);
+		/* const matched = checkForAdjacentMatch(index, levelManager.levelData.matchResult.matchingList);
 		if (!matched) return;
 
 		if (!damaged) {
@@ -31,7 +30,7 @@ const RockTile = ({ index }: TileProps) => {
 		rockCrack2Sound.play();
 		const newTiles = structuredClone(levelManager.levelData.tiles) as LevelTile[];
 		newTiles[index] = { type: 'Normal' };
-		levelManager.setTiles(newTiles, true);
+		levelManager.setTiles(newTiles, true); */
 	};
 
 	return (

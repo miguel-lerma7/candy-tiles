@@ -25,7 +25,8 @@
     "react-icons": "^4.6.0",
     "react-router-dom": "^6.4.3",
     "react-uuid": "^2.0.0",
-    "recoil": "^0.7.6"
+    "recoil": "^0.7.6",
+    "vite-tsconfig-paths": "^4.0.3"
   },
   "devDependencies": {
     "@types/animejs": "^3.1.6",

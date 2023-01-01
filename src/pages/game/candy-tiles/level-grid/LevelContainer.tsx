@@ -3,7 +3,7 @@ import { levelList } from '../../../../data/level-layouts';
 import uuid from 'react-uuid';
 import TileGrid from './TileGrid';
 import ItemGrid from './ItemGrid';
-import LevelManagerC from './LevelManagerC';
+import LevelManager from './LevelManager';
 import DelayComponent from '../../../../components/DelayComponent';
 import { ANIMATION_TIME_MS } from '../../../../config';
 
@@ -18,7 +18,7 @@ const LevelContainer = () => {
 
 	return (
 		<section className='grow aspect-square rounded-lg overflow-hidden relative select-none' ref={levelGridElement}>
-			<LevelManagerC></LevelManagerC>
+			<LevelManager></LevelManager>
 			<TileGrid></TileGrid>
 			<DelayComponent delayMs={ANIMATION_TIME_MS}>
 				<ItemGrid></ItemGrid>

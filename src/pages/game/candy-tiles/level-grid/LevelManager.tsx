@@ -7,6 +7,7 @@ import {
 	checkForMatchings,
 	generateNewCandies,
 	getHorizontalAndVerticalItems,
+	getMatchGroupCenterIndex,
 	repositionItems,
 } from '../../../../game-algorithms/tile-matching';
 import { levelItemsState } from '../../../../recoil/atoms/levelItems';
@@ -27,7 +28,8 @@ export let latestSwappedCandyColor: CandyColor = DEFAULT_SWAPPED_CANDY_COLOR;
 const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[] => {
 	const newItemList = structuredClone(itemList) as LevelItem[];
 	matchInfo.matchingList = applySuperCandyEffects(matchInfo.matchingList, newItemList);
-	const matchGroupsCenters = matchInfo.matchingGroups.map(x => x[Math.floor(x.length / 2)]);
+
+	const matchGroupsCenters = matchInfo.matchingGroups.map(group => getMatchGroupCenterIndex(group));
 	matchInfo.matchingList
 		.filter(x => x.matched)
 		.forEach(y => {
@@ -74,7 +76,7 @@ const playMatchSFX = (): void => {
 	matchSound.preservesPitch = false;
 };
 
-const LevelManagerC = () => {
+const LevelManager = () => {
 	const [swappedItems, setSwappedItems] = useRecoilState(swappedItemsState);
 	const [levelItems, setLevelItems] = useRecoilState(levelItemsState);
 	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
@@ -169,4 +171,4 @@ const LevelManagerC = () => {
 	return <></>;
 };
 
-export default LevelManagerC;
+export default LevelManager;

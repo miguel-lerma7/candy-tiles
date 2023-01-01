@@ -68,19 +68,30 @@ const candyTypesArray = ['Candy', 'SuperCandy'];
 
 const getMatchGroups = (matchList: MatchDetail[], itemsList: readonly LevelItem[]): MatchGroup[] => {
 	const matchedCandyList = matchList.filter(x => x.matched && candyTypesArray.includes(itemsList[x.index]?.type || ''));
-	const groups = matchedCandyList.reduce((prev, curr) => {
-		if (prev.length === 0) {
-			prev.push([curr.index]);
-			return prev;
-		}
+	if (matchedCandyList.length === 0) return [];
 
-		const candyColor = (itemsList[curr.index] as Candy).color;
-		const sameColor = (other: number): boolean => (itemsList[other] as Candy).color === candyColor;
-		const group = prev.findIndex(x => x.some(y => tilesAreAdjacent(curr.index, y) && sameColor(y)));
-		const validGroup = group >= 0;
-		validGroup ? prev[group].push(curr.index) : prev.push([curr.index]);
-		return prev;
-	}, [] as MatchGroup[]) as MatchGroup[];
+	const getAdjacentsWithSameColor = (group: MatchGroup, index: number) => {
+		const color = (itemsList[index] as Candy).color;
+		const sameColor = (other: number): boolean => (itemsList[other] as Candy).color === color;
+		const adjacentMatches = matchedCandyList.filter(
+			x => tilesAreAdjacent(index, x.index) && sameColor(x.index) && !group.includes(x.index)
+		);
+
+		const adjacents: number[] = adjacentMatches.map(x => x.index);
+		group.push(...adjacents);
+		adjacents.forEach(x => getAdjacentsWithSameColor(group, x));
+	};
+
+	const groups: MatchGroup[] = [];
+	matchedCandyList.forEach(match => {
+		let currentGroup = groups.findIndex(group => group.includes(match.index));
+		const alreadyInAGroup = currentGroup >= 0;
+		if (alreadyInAGroup) return;
+
+		groups.push([match.index]);
+		currentGroup = groups.findIndex(group => group.includes(match.index));
+		getAdjacentsWithSameColor(groups[currentGroup], match.index);
+	});
 
 	return groups;
 };
@@ -200,4 +211,25 @@ export const allTilesFilled = (items: readonly LevelItem[], tiles: readonly Leve
 export const checkForAdjacentMatch = (index: number, matchList: readonly MatchDetail[]): boolean => {
 	const adjacentIndexes = getAdjacentIndexes(index);
 	return matchList.filter(x => adjacentIndexes.includes(x.index)).some(y => y.matched);
+};
+
+export const getMatchGroupCenterIndex = (matchGroup: MatchGroup): number => {
+	//TODO: COME UP WITH ANOTHER WAY TO CALCULATE THE CENTER
+
+	
+	const adjacentSumsList = matchGroup.map(index => {
+		const adjacentMatches = matchGroup.reduce((prev, curr) => (tilesAreAdjacent(index, curr) ? (prev += 1) : prev), 0);
+		return adjacentMatches;
+	});
+
+	console.log(matchGroup);
+	console.log(adjacentSumsList);
+	const greatestAdjacentSum = Math.max(...adjacentSumsList);
+	const foo = adjacentSumsList.filter(sum => sum === greatestAdjacentSum).length > 1;
+	
+	const centerIndex = adjacentSumsList[Math.floor(adjacentSumsList.length / 2)];
+	const groupCenterIndex = foo ? centerIndex : adjacentSumsList.findIndex(sum => sum === greatestAdjacentSum);
+	console.log(matchGroup[groupCenterIndex]);
+
+	return matchGroup[groupCenterIndex];
 };

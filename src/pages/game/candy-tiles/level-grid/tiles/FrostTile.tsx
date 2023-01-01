@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import levelManager from '../level-manager';
 import { TileProps } from './Tile';
 import iceCrack1SFX from './../../../../../assets/audio/iceCrack1.mp3';
 import iceCrack2SFX from './../../../../../assets/audio/iceCrack2.mp3';
@@ -11,14 +10,14 @@ const FrostTile = ({ index }: TileProps) => {
 	const [damaged, setDamaged] = useState(false);
 
 	useEffect(() => {
-		levelManager.subscribeItemsChange(onItemsChange);
+		/* levelManager.subscribeItemsChange(onItemsChange);
 		return () => {
 			levelManager.unsubscribeItemsChange(onItemsChange);
-		};
+		}; */
 	}, [damaged]);
 
 	const onItemsChange = (): void => {
-		const matched = levelManager.levelData.matchResult.matchingList.some(x => x.index === index && x.matched);
+		/* const matched = levelManager.levelData.matchResult.matchingList.some(x => x.index === index && x.matched);
 		if (!matched) return;
 
 		if (!damaged) {
@@ -30,7 +29,7 @@ const FrostTile = ({ index }: TileProps) => {
 		iceCrack2Sound.play();
 		const newTiles = structuredClone(levelManager.levelData.tiles) as LevelTile[];
 		newTiles[index] = { type: 'Normal' };
-		levelManager.setTiles(newTiles, true);
+		levelManager.setTiles(newTiles, true); */
 	};
 
 	return (

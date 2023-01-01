@@ -5,7 +5,7 @@ import LevelItemFX from '../items-fx/LevelItemFX';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
 import { useRecoilValue } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
-import { latestSwappedCandyColor } from '../LevelManagerC';
+import { latestSwappedCandyColor } from '../LevelManager';
 import anime from 'animejs';
 
 type ChocolateProps = {
@@ -17,8 +17,6 @@ const chocolateMatchSound = new Audio(chocolateMatchSFX);
 chocolateMatchSound.volume = 0.5;
 
 const animateItemSpawn = (element: HTMLElement): void => {
-	console.log(element);
-
 	anime({
 		targets: element,
 		scale: [0, 2, 1],

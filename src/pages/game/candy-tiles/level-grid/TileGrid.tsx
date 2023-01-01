@@ -6,8 +6,6 @@ import { levelList } from '../../../../data/level-layouts';
 import { tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
 import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
 import tileClickSFX from './../../../../assets/audio/tileClick.mp3';
-import levelManager from './level-manager';
-import LevelManager from './level-manager';
 import FrostTile from './tiles/FrostTile';
 import RockTile from './tiles/RockTile';
 import Tile from './tiles/Tile';
@@ -32,7 +30,7 @@ const getTileComponent = (tileType: string, index: number): JSX.Element => {
 
 const TileGrid = () => {
 	const selectedLevel = levelList[0];
-	const [tileList, setTileList] = useState(selectedLevel.tiles);
+	const [tileList] = useState(selectedLevel.tiles);
 	const dragging = useRef<boolean>(false);
 	const levelContext = useLevelContext();
 	const firstTile = useRef<HTMLElement | null>();
@@ -41,14 +39,7 @@ const TileGrid = () => {
 
 	useEffect(() => {
 		tileClickAudio.current.volume = 0.5;
-		LevelManager.subscribeTilesChange(onTilesChange);
-
-		return () => {
-			LevelManager.unsubscribeTilesChange(onTilesChange);
-		};
 	}, []);
-
-	const onTilesChange = () => setTileList(levelManager.levelData.tiles);
 
 	const handleMouseDown = (e: React.MouseEvent): void => {
 		if (!elementIsTile(e.target as HTMLElement)) return;
