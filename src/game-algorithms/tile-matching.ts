@@ -1,6 +1,6 @@
 import uuid from 'react-uuid';
 import { COLUMN_NUMBER, ROW_NUMBER } from '../config';
-import { getNumberRangeArray, getNumberSequenceArray } from '../utils/array';
+import { findAllIndeces, getArrayNumberSum, getNumberRangeArray, getNumberSequenceArray } from '../utils/array';
 export const CANDY_COLOR_LIST: string[] = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 
 export const getItemRowIndex = (index: number): number => Math.ceil((index + 1) / COLUMN_NUMBER);
@@ -213,23 +213,34 @@ export const checkForAdjacentMatch = (index: number, matchList: readonly MatchDe
 	return matchList.filter(x => adjacentIndexes.includes(x.index)).some(y => y.matched);
 };
 
-export const getMatchGroupCenterIndex = (matchGroup: MatchGroup): number => {
-	//TODO: COME UP WITH ANOTHER WAY TO CALCULATE THE CENTER
+const excludeMatchesOutsideGroup = (match: MatchDetail, group: MatchGroup): MatchDetail => {
+	const surroundingItemsOffsets = [-ROW_NUMBER, ROW_NUMBER, -1, 1]; //sort: up, down, left, right
+	const matchIsInGroup = (index: number): boolean => group.includes(index);
+	['up', 'down', 'left', 'right'].forEach((side, index) => {
+		const key = side as keyof MatchDetail;
+		if (match[key] === 1 && !matchIsInGroup(match.index + surroundingItemsOffsets[index])) (match[key] as number) = 0;
+	});
+	return match;
+};
 
-	
+const emptyMatchDetail: MatchDetail = { index: -1, matched: false, down: 0, left: 0, right: 0, up: 0 };
+export const getMatchGroupCenterIndex = (matchGroup: MatchGroup, matchList: MatchDetail[]): number => {
+	let matchDetails = matchGroup.map(x => matchList.find(detail => detail.index === x) || emptyMatchDetail);
+	matchDetails = matchDetails.map(match => excludeMatchesOutsideGroup(match, matchGroup));
+
 	const adjacentSumsList = matchGroup.map(index => {
-		const adjacentMatches = matchGroup.reduce((prev, curr) => (tilesAreAdjacent(index, curr) ? (prev += 1) : prev), 0);
+		const match = matchDetails.find(x => x.index === index) || emptyMatchDetail;
+		const adjacentMatches = getArrayNumberSum([match.up, match.down, match.left, match.right]);
 		return adjacentMatches;
 	});
-
-	console.log(matchGroup);
-	console.log(adjacentSumsList);
 	const greatestAdjacentSum = Math.max(...adjacentSumsList);
-	const foo = adjacentSumsList.filter(sum => sum === greatestAdjacentSum).length > 1;
-	
-	const centerIndex = adjacentSumsList[Math.floor(adjacentSumsList.length / 2)];
-	const groupCenterIndex = foo ? centerIndex : adjacentSumsList.findIndex(sum => sum === greatestAdjacentSum);
-	console.log(matchGroup[groupCenterIndex]);
+	const greatestAdjacentSumsIndices = findAllIndeces(adjacentSumsList, sum => sum === greatestAdjacentSum);
 
-	return matchGroup[groupCenterIndex];
+	const matchBalanceList: number[] = matchDetails.map(x => Math.abs(Math.abs(x.up - x.down) - Math.abs(x.left - x.right)));
+	const mostBalancedMatch = Math.min(...matchBalanceList.filter((x, i) => greatestAdjacentSumsIndices.includes(i)));
+
+	const groupCenterIndex = matchGroup.find(
+		(x, index) => adjacentSumsList[index] === greatestAdjacentSum && matchBalanceList[index] === mostBalancedMatch
+	);
+	return groupCenterIndex || -1;
 };

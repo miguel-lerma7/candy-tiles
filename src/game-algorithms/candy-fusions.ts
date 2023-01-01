@@ -2,9 +2,6 @@ import uuid from 'react-uuid';
 
 export const getLevelItemByFusion = (matchDetail: MatchDetail, itemToFuse: LevelItem): LevelItem => {
 	let item: LevelItem = null;
-	console.log(matchDetail);
-	
-
 	const itemIsACandy = itemToFuse?.type === 'Candy' || itemToFuse?.type === 'SuperCandy';
 	if (!itemIsACandy) return null;
 

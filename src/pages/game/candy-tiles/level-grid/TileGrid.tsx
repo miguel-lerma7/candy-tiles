@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { COLUMN_NUMBER, ROW_NUMBER } from '../../../../config';
 import { useLevelContext } from '../../../../context/LevelContext';
 import { levelList } from '../../../../data/level-layouts';
 import { tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
+import { allowSwapState } from '../../../../recoil/atoms/allowSwap';
 import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
 import tileClickSFX from './../../../../assets/audio/tileClick.mp3';
 import FrostTile from './tiles/FrostTile';
@@ -28,24 +29,35 @@ const getTileComponent = (tileType: string, index: number): JSX.Element => {
 	}
 };
 
+const tileClickAudio = new Audio(tileClickSFX);
+
 const TileGrid = () => {
 	const selectedLevel = levelList[0];
 	const [tileList] = useState(selectedLevel.tiles);
 	const dragging = useRef<boolean>(false);
 	const levelContext = useLevelContext();
 	const firstTile = useRef<HTMLElement | null>();
-	const tileClickAudio = useRef<HTMLAudioElement>(new Audio(tileClickSFX));
 	const setSwappedItems = useSetRecoilState(swappedItemsState);
+	const allowSwap = useRecoilValue(allowSwapState);
+	const tileGridElementRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
-		tileClickAudio.current.volume = 0.5;
+		tileClickAudio.volume = 0.5;
 	}, []);
+
+	useEffect(() => {
+		updateGridInteraction();
+	}, [allowSwap]);
+
+	const updateGridInteraction = () => {
+		if (tileGridElementRef.current) tileGridElementRef.current.style.pointerEvents = allowSwap ? 'all' : 'none';
+	};
 
 	const handleMouseDown = (e: React.MouseEvent): void => {
 		if (!elementIsTile(e.target as HTMLElement)) return;
 		dragging.current = true;
 		firstTile.current = e.target as HTMLElement;
-		tileClickAudio.current.play();
+		tileClickAudio.play();
 	};
 
 	const handleMouseUp = (): void => {
@@ -54,7 +66,7 @@ const TileGrid = () => {
 	};
 
 	const handleMouseOver = (e: React.MouseEvent): void => {
-		if (!elementIsTile(e.target as HTMLElement) || !firstTile.current || !dragging.current) return;
+		if (!elementIsTile(e.target as HTMLElement) || !firstTile.current || !dragging.current || !allowSwap) return;
 
 		const firstTileIndex = parseInt(firstTile.current.getAttribute('data-index') || '');
 		const secondTileIndex = parseInt((e.target as HTMLElement).getAttribute('data-index') || '');
@@ -66,8 +78,6 @@ const TileGrid = () => {
 		}
 
 		setSwappedItems([firstTileIndex, secondTileIndex]);
-		//LevelManager.swapItems([firstTileIndex, secondTileIndex]);
-
 		firstTile.current = null;
 	};
 
@@ -78,6 +88,7 @@ const TileGrid = () => {
 			onMouseDown={handleMouseDown}
 			onMouseUp={handleMouseUp}
 			onMouseOver={handleMouseOver}
+			ref={tileGridElementRef}
 		>
 			{tileList.map((tile, index) => (tile === null ? <div key={index}> </div> : getTileComponent(tile.type, index)))}
 		</div>

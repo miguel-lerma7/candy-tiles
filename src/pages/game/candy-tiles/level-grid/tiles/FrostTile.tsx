@@ -1,23 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TileProps } from './Tile';
 import iceCrack1SFX from './../../../../../assets/audio/iceCrack1.mp3';
 import iceCrack2SFX from './../../../../../assets/audio/iceCrack2.mp3';
+import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { matchListState } from '../../../../../recoil/atoms/matchList';
+import { levelTilesState } from '../../../../../recoil/atoms/levelTiles';
 
 const iceCrack1Sound = new Audio(iceCrack1SFX);
 const iceCrack2Sound = new Audio(iceCrack2SFX);
 
 const FrostTile = ({ index }: TileProps) => {
 	const [damaged, setDamaged] = useState(false);
+	const matchList = useRecoilValue(matchListState);
+	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
 
-	useEffect(() => {
-		/* levelManager.subscribeItemsChange(onItemsChange);
-		return () => {
-			levelManager.unsubscribeItemsChange(onItemsChange);
-		}; */
-	}, [damaged]);
+	useEffectAfterFirstRender(() => {
+		checkMatchInTile();
+	}, [matchList]);
 
-	const onItemsChange = (): void => {
-		/* const matched = levelManager.levelData.matchResult.matchingList.some(x => x.index === index && x.matched);
+	const checkMatchInTile = () => {
+		const matched = !!matchList.find(x => x.index === index)?.matched;
 		if (!matched) return;
 
 		if (!damaged) {
@@ -27,9 +30,9 @@ const FrostTile = ({ index }: TileProps) => {
 		}
 
 		iceCrack2Sound.play();
-		const newTiles = structuredClone(levelManager.levelData.tiles) as LevelTile[];
+		const newTiles = structuredClone(levelTiles) as LevelTile[];
 		newTiles[index] = { type: 'Normal' };
-		levelManager.setTiles(newTiles, true); */
+		setLevelTiles(newTiles);
 	};
 
 	return (

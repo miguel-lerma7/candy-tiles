@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { ANIMATION_TIME_MS } from '../../../../config';
 import { levelList } from '../../../../data/level-layouts';
 import {
@@ -17,6 +17,8 @@ import matchSFX from './../../../../assets/audio/match.mp3';
 import fusionMatchSFX from './../../../../assets/audio/fusionMatch.mp3';
 import { delay } from '../../../../utils/delay';
 import { getLevelItemByFusion } from '../../../../game-algorithms/candy-fusions';
+import { allowSwapState } from '../../../../recoil/atoms/allowSwap';
+import { matchListState } from '../../../../recoil/atoms/matchList';
 
 const matchSound = new Audio(matchSFX);
 const fusionMatchSound = new Audio(fusionMatchSFX);
@@ -29,7 +31,7 @@ const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[
 	const newItemList = structuredClone(itemList) as LevelItem[];
 	matchInfo.matchingList = applySuperCandyEffects(matchInfo.matchingList, newItemList);
 
-	const matchGroupsCenters = matchInfo.matchingGroups.map(group => getMatchGroupCenterIndex(group));
+	const matchGroupsCenters = matchInfo.matchingGroups.map(group => getMatchGroupCenterIndex(group, matchInfo.matchingList));
 	matchInfo.matchingList
 		.filter(x => x.matched)
 		.forEach(y => {
@@ -80,6 +82,8 @@ const LevelManager = () => {
 	const [swappedItems, setSwappedItems] = useRecoilState(swappedItemsState);
 	const [levelItems, setLevelItems] = useRecoilState(levelItemsState);
 	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
+	const setAllowSwap = useSetRecoilState(allowSwapState);
+	const setMatchList = useSetRecoilState(matchListState);
 
 	const itemsWereSwapped = useRef(false);
 
@@ -114,6 +118,7 @@ const LevelManager = () => {
 		}
 
 		setLevelItems(newLevelItems);
+		setAllowSwap(false);
 		setTimeout(() => checkForMatches(newLevelItems, true), ANIMATION_TIME_MS);
 	};
 
@@ -128,6 +133,7 @@ const LevelManager = () => {
 			comboCount += 1;
 			const matchResult = applyMatches(matchInfo, itemList);
 			setLevelItems(matchResult);
+			setMatchList(matchInfo.matchingList);
 			await delay(ANIMATION_TIME_MS);
 			const repositionResult = repositionItems(matchResult, levelTiles).repositionedItems;
 			const fillResult = generateNewCandies(repositionResult, levelTiles);
@@ -141,6 +147,7 @@ const LevelManager = () => {
 		thereAreSwappedItems && checkSwap && swapItems(true);
 
 		comboCount = 0;
+		setAllowSwap(true);
 	};
 
 	const checkChocolateSwap = (matchInfo: MatchResult, itemList: LevelItem[]): MatchResult => {
