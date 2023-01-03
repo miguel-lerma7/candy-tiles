@@ -20,17 +20,17 @@ type LevelItemProps = {
 	initialIndex: number;
 };
 
-const getItemComponent = (item: LevelItem | null, itemIndex: number): JSX.Element => {
+const getItemComponent = (item: LevelItem | null): JSX.Element => {	
 	const id = item?.key || '';
 	switch (item?.type) {
 		case 'Candy':
-			return <Candy color={item.color} initialIndex={itemIndex} id={id} key={id}></Candy>;
+			return <Candy color={item.color} id={id} key={id}></Candy>;
 
 		case 'SuperCandy':
-			return <SuperCandy color={item.color} initialIndex={itemIndex} id={id} key={id}></SuperCandy>;
+			return <SuperCandy color={item.color} id={id} key={id}></SuperCandy>;
 
 		case 'Chocolate':
-			return <Chocolate initialIndex={itemIndex} id={id} key={id}></Chocolate>;
+			return <Chocolate id={id} key={id}></Chocolate>;
 
 		default:
 			return <div></div>;
@@ -75,7 +75,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	}, []);
 
 	useEffectAfterFirstRender(() => {
-		updatePosition();
+		updatePosition();     
 		emptyTargetRef.current && spawnItem();
 	}, [levelItems]);
 
@@ -131,7 +131,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 			}}
 			ref={elementRef}
 		>
-			{levelItemTarget !== null ? getItemComponent(levelItemTarget, getItemIndex()) : <></>}
+			{levelItemTarget !== null ? getItemComponent(levelItemTarget) : <></>}
 		</div>
 	);
 };

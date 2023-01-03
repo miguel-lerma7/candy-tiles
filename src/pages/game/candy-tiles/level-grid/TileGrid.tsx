@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { COLUMN_NUMBER, ROW_NUMBER } from '../../../../config';
 import { useLevelContext } from '../../../../context/LevelContext';
-import { levelList } from '../../../../data/level-layouts';
 import { tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
 import { allowSwapState } from '../../../../recoil/atoms/allowSwap';
+import { levelTilesState } from '../../../../recoil/atoms/levelTiles';
 import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
 import tileClickSFX from './../../../../assets/audio/tileClick.mp3';
 import FrostTile from './tiles/FrostTile';
@@ -32,8 +32,7 @@ const getTileComponent = (tileType: string, index: number): JSX.Element => {
 const tileClickAudio = new Audio(tileClickSFX);
 
 const TileGrid = () => {
-	const selectedLevel = levelList[0];
-	const [tileList] = useState(selectedLevel.tiles);
+	const levelTiles = useRecoilValue(levelTilesState);
 	const dragging = useRef<boolean>(false);
 	const levelContext = useLevelContext();
 	const firstTile = useRef<HTMLElement | null>();
@@ -90,7 +89,7 @@ const TileGrid = () => {
 			onMouseOver={handleMouseOver}
 			ref={tileGridElementRef}
 		>
-			{tileList.map((tile, index) => (tile === null ? <div key={index}> </div> : getTileComponent(tile.type, index)))}
+			{levelTiles.map((tile, index) => (tile === null ? <div key={index}> </div> : getTileComponent(tile.type, index)))}
 		</div>
 	);
 };

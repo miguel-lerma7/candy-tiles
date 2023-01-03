@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { checkForAdjacentMatch } from '../../../../../game-algorithms/tile-matching';
 import { TileProps } from './Tile';
 import rockCrack1SFX from './../../../../../assets/audio/rockCrack1.mp3';
 import rockCrack2SFX from './../../../../../assets/audio/rockCrack2.mp3';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { matchListState } from '../../../../../recoil/atoms/matchList';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
+import { levelTilesState } from '../../../../../recoil/atoms/levelTiles';
 
 const rockCrack1Sound = new Audio(rockCrack1SFX);
 const rockCrack2Sound = new Audio(rockCrack2SFX);
@@ -13,20 +14,14 @@ const rockCrack2Sound = new Audio(rockCrack2SFX);
 const RockTile = ({ index }: TileProps) => {
 	const [damaged, setDamaged] = useState(false);
 	const matchList = useRecoilValue(matchListState);
-
-	useEffect(() => {
-		/* levelManager.subscribeItemsChange(onItemsChange);
-		return () => {
-			levelManager.unsubscribeItemsChange(onItemsChange);
-		}; */
-	}, [damaged]);
+	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
 
 	useEffectAfterFirstRender(() => {
-		console.log(structuredClone(matchList.find(x => x.index === index) || 0));
+		checkMatchInAdjacentTiles();
 	}, [matchList]);
 
-	const onItemsChange = (): void => {
-		/* const matched = checkForAdjacentMatch(index, levelManager.levelData.matchResult.matchingList);
+	const checkMatchInAdjacentTiles = () => {
+		const matched = checkForAdjacentMatch(index, matchList);
 		if (!matched) return;
 
 		if (!damaged) {
@@ -36,9 +31,9 @@ const RockTile = ({ index }: TileProps) => {
 		}
 
 		rockCrack2Sound.play();
-		const newTiles = structuredClone(levelManager.levelData.tiles) as LevelTile[];
+		const newTiles = structuredClone(levelTiles) as LevelTile[];
 		newTiles[index] = { type: 'Normal' };
-		levelManager.setTiles(newTiles, true); */
+		setLevelTiles(newTiles);
 	};
 
 	return (

@@ -6,12 +6,16 @@ import blue from './../../../../../assets/candies/blue.png';
 import purple from './../../../../../assets/candies/purple.png';
 import candyBounceSFX from './../../../../../assets/audio/candyBounce.mp3';
 import { useEffect, useRef, useState } from 'react';
-import LevelItemFX from '../items-fx/LevelItemFX';
-import { useRecoilValue } from 'recoil';
+import LevelItemFX from '../fx/LevelItemFX';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
 import anime from 'animejs';
-import { ANIMATION_TIME_MS } from '../../../../../config';
+import { userInteractedWithDocumentState } from '../../../../../recoil/atoms/userInteractedWithDocument';
+import { scoreState } from '../../../../../recoil/atoms/score';
+import { scoreFxListState } from '../../../../../recoil/atoms/scoreFxList';
+import uuid from 'react-uuid';
+import { getItemColumnIndex, getItemRowIndex } from '../../../../../game-algorithms/tile-matching';
 
 const candyImages: { [key: string]: string } = {
 	'Red': red,
@@ -24,6 +28,17 @@ const candyImages: { [key: string]: string } = {
 
 export const CandyColors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 
+let activeBounceSounds = 0;
+const activeBounceSoundsLimit = 10;
+const playCandyBounchSound = (userInteractedWithDocument: boolean) => {
+	if (!userInteractedWithDocument || activeBounceSounds > activeBounceSoundsLimit) return;
+	const candyBounceAudio = new Audio(candyBounceSFX);
+	candyBounceAudio.volume = 0.15;
+	candyBounceAudio.play();
+	candyBounceAudio.onended = () => (activeBounceSounds = -1);
+	activeBounceSounds += 1;
+};
+
 const animateItemSpawn = (element: HTMLElement): void => {
 	anime({
 		targets: element,
@@ -32,31 +47,27 @@ const animateItemSpawn = (element: HTMLElement): void => {
 		duration: 750,
 		easing: 'easeOutBounce',
 	});
-
-	const candyBounceAudio = new Audio(candyBounceSFX);
-	candyBounceAudio.volume = 0.15;
-	candyBounceAudio.play();
 };
 
 type CandyProps = {
 	color: CandyColor;
-	initialIndex: number;
 	id: string;
 };
 
-const Candy = ({ color, initialIndex, id }: CandyProps) => {
+const CANDY_SCORE = 10;
+
+const Candy = ({ color, id }: CandyProps) => {
 	const [showFX, setShowFX] = useState(false);
-	const indexRef = useRef(initialIndex);
 	const levelItems = useRecoilValue(levelItemsState);
 	const elementRef = useRef<HTMLElement | null>(null);
+	const userInteractedWithDocument = useRecoilValue(userInteractedWithDocumentState);
+	const setScore = useSetRecoilState(scoreState);
+	const setScoreFxList = useSetRecoilState(scoreFxListState);
 
 	useEffect(() => {
 		animateItemSpawn(elementRef.current as HTMLElement);
+		playCandyBounchSound(userInteractedWithDocument);
 	}, []);
-
-	useEffect(() => {
-		indexRef.current = initialIndex;
-	}, [initialIndex]);
 
 	useEffect(() => {
 		!!id && setShowFX(false);
@@ -64,8 +75,22 @@ const Candy = ({ color, initialIndex, id }: CandyProps) => {
 
 	useEffectAfterFirstRender(() => {
 		const itemMatched = !levelItems.some(x => x?.key === id);
-		itemMatched && setShowFX(true);
+		itemMatched && onItemMatch();
 	}, [levelItems]);
+
+	const onItemMatch = () => {		
+		setScore(score => score + CANDY_SCORE);
+		setShowFX(true);
+		setScoreFxList(list => [
+			...list,
+			{
+				color: 'white',
+				key: uuid(),
+				position: [(getItemColumnIndex(1) - 1) * 100, (getItemRowIndex(1) - 1) * 100],
+				score: CANDY_SCORE,
+			},
+		]);
+	};
 
 	return (
 		<span className='relative w-full h-full block' ref={elementRef}>

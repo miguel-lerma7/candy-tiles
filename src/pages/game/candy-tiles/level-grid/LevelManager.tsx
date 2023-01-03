@@ -19,6 +19,7 @@ import { delay } from '../../../../utils/delay';
 import { getLevelItemByFusion } from '../../../../game-algorithms/candy-fusions';
 import { allowSwapState } from '../../../../recoil/atoms/allowSwap';
 import { matchListState } from '../../../../recoil/atoms/matchList';
+import uuid from 'react-uuid';
 
 const matchSound = new Audio(matchSFX);
 const fusionMatchSound = new Audio(fusionMatchSFX);
@@ -26,6 +27,11 @@ const fusionMatchSound = new Audio(fusionMatchSFX);
 export let comboCount = 0;
 const DEFAULT_SWAPPED_CANDY_COLOR: CandyColor = 'Red';
 export let latestSwappedCandyColor: CandyColor = DEFAULT_SWAPPED_CANDY_COLOR;
+
+const playFusionMatch = () => {
+	fusionMatchSound.currentTime = 0;
+	fusionMatchSound.play();
+};
 
 const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[] => {
 	const newItemList = structuredClone(itemList) as LevelItem[];
@@ -38,7 +44,7 @@ const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[
 			const itemIsAtMatchGroupCenter = matchGroupsCenters.includes(y.index);
 			newItemList[y.index] = itemIsAtMatchGroupCenter ? getLevelItemByFusion(y, newItemList[y.index]) : null;
 			const itemWasFused = newItemList[y.index] !== null;
-			itemWasFused && fusionMatchSound.play();
+			itemWasFused && playFusionMatch();
 		});
 
 	return newItemList;
@@ -71,6 +77,14 @@ const applySuperCandyEffects = (matchList: MatchDetail[], itemList: LevelItem[])
 	return newMatchList;
 };
 
+const getInitialItems = (selectedLevel: number): LevelItem[] => {
+	levelList[selectedLevel].items.forEach(x => x !== null && x.key === uuid());
+	return levelList[0].items.map(x => {
+		x !== null && (x.key = uuid());
+		return x;
+	});
+};
+
 const playMatchSFX = (): void => {
 	matchSound.playbackRate = 1 + comboCount / 10;
 	matchSound.currentTime = 0;
@@ -88,8 +102,9 @@ const LevelManager = () => {
 	const itemsWereSwapped = useRef(false);
 
 	useEffect(() => {
+		const initialItems = getInitialItems(0);
 		setLevelTiles(levelList[0].tiles);
-		setLevelItems(levelList[0].items);
+		setLevelItems(initialItems);
 	}, []);
 
 	useEffect(() => swapItems(false), [swappedItems]);

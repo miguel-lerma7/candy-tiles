@@ -56,4 +56,11 @@ declare global {
 	};
 
 	type SwappedItems = [number | null, number | null];
+
+	type ScoreFx = {
+		position: [number, number];
+		color: string;
+		score: number;
+		key: string
+	};
 }

@@ -1,17 +1,13 @@
 import chocolateSprite from './../../../../../assets/candies/chocolate.png';
 import { useEffect, useRef, useState } from 'react';
 import chocolateMatchSFX from './../../../../../assets/audio/chocolateMatch.mp3';
-import LevelItemFX from '../items-fx/LevelItemFX';
+import LevelItemFX from '../fx/LevelItemFX';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import { latestSwappedCandyColor } from '../LevelManager';
 import anime from 'animejs';
-
-type ChocolateProps = {
-	initialIndex: number;
-	id: string;
-};
+import { scoreState } from '../../../../../recoil/atoms/score';
 
 const chocolateMatchSound = new Audio(chocolateMatchSFX);
 chocolateMatchSound.volume = 0.5;
@@ -26,29 +22,34 @@ const animateItemSpawn = (element: HTMLElement): void => {
 	});
 };
 
-const Chocolate = ({ initialIndex, id }: ChocolateProps) => {
+const CHOCHOLATE_SCORE = 100;
+
+type ChocolateProps = {
+	id: string;
+};
+
+const Chocolate = ({ id }: ChocolateProps) => {
 	const [scale] = useState(0);
 	const [showFX, setShowFX] = useState(false);
-	const indexRef = useRef(initialIndex);
 	const itemUsedRef = useRef(false);
 	const levelItems = useRecoilValue(levelItemsState);
 	const elementRef = useRef<HTMLImageElement | null>(null);
-
+	const setScore = useSetRecoilState(scoreState);
+ 
 	useEffect(() => {
 		animateItemSpawn(elementRef.current as HTMLElement);
 	}, []);
 
-	useEffect(() => {
-		indexRef.current = initialIndex;
-	}, [initialIndex]);
-
 	useEffectAfterFirstRender(() => {
 		const itemMatched = !levelItems.some(x => x?.key === id);
-		if (!itemMatched || itemUsedRef.current) return;
-
-		setShowFX(true);
-		chocolateMatchSound.play();
+		if (itemMatched && !itemUsedRef.current) onItemMatch();
 	}, [levelItems]);
+
+	const onItemMatch = () => {
+		setShowFX(true);
+		setScore(score => score + CHOCHOLATE_SCORE);
+		chocolateMatchSound.play();
+	};
 
 	return showFX ? (
 		<LevelItemFX color={latestSwappedCandyColor} maskSrc='/img/fx/triangleShape.png'></LevelItemFX>

@@ -6,11 +6,12 @@ import superBlue from './../../../../../assets/candies/super-blue.png';
 import superPurple from './../../../../../assets/candies/super-purple.png';
 import superCandyMatchSFX from './../../../../../assets/audio/superCandyMatch.mp3';
 import { useEffect, useRef, useState } from 'react';
-import LevelItemFX from '../items-fx/LevelItemFX';
-import { useRecoilValue } from 'recoil';
+import LevelItemFX from '../fx/LevelItemFX';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
 import anime from 'animejs';
+import { scoreState } from '../../../../../recoil/atoms/score';
 
 const candyImages: { [key: string]: string } = {
 	'Red': superRed,
@@ -35,34 +36,34 @@ const animateItemSpawn = (element: HTMLElement): void => {
 	});
 };
 
+const SUPER_CANDY_SCORE = 50;
+
 type SuperCandyProps = {
 	color: CandyColor;
-	initialIndex: number;
 	id: string;
 };
 
-const SuperCandy = ({ color, initialIndex, id }: SuperCandyProps) => {
+const SuperCandy = ({ color, id }: SuperCandyProps) => {
 	const [showFX, setShowFX] = useState(false);
-	const indexRef = useRef(initialIndex);
 	const itemUsedRef = useRef(false);
 	const elementRef = useRef<HTMLImageElement | null>(null);
 	const levelItems = useRecoilValue(levelItemsState);
+	const setScore = useSetRecoilState(scoreState);
 
 	useEffect(() => {
 		animateItemSpawn(elementRef.current as HTMLElement);
 	}, []);
 
-	useEffect(() => {
-		indexRef.current = initialIndex;
-	}, [initialIndex]);
-
 	useEffectAfterFirstRender(() => {
 		const itemMatched = !levelItems.some(x => x?.key === id);
-		if (!itemMatched || itemUsedRef.current) return;
-
-		setShowFX(true);
-		superCandyMatchSound.play();
+		itemMatched && !itemUsedRef.current && onItemMatch();
 	}, [levelItems]);
+
+	const onItemMatch = () => {
+		setShowFX(true);
+		setScore(score => score + SUPER_CANDY_SCORE);
+		superCandyMatchSound.play();
+	};
 
 	return showFX ? (
 		<LevelItemFX color={color} maskSrc='/img/fx/squareShape.png'></LevelItemFX>
