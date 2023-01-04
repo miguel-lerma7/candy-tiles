@@ -63,6 +63,7 @@ const Candy = ({ color, id }: CandyProps) => {
 	const userInteractedWithDocument = useRecoilValue(userInteractedWithDocumentState);
 	const setScore = useSetRecoilState(scoreState);
 	const setScoreFxList = useSetRecoilState(scoreFxListState);
+	const currentIndex = useRef(-1);
 
 	useEffect(() => {
 		animateItemSpawn(elementRef.current as HTMLElement);
@@ -76,9 +77,10 @@ const Candy = ({ color, id }: CandyProps) => {
 	useEffectAfterFirstRender(() => {
 		const itemMatched = !levelItems.some(x => x?.key === id);
 		itemMatched && onItemMatch();
+		currentIndex.current = levelItems.findIndex(x => x?.key === id);
 	}, [levelItems]);
 
-	const onItemMatch = () => {		
+	const onItemMatch = () => {
 		setScore(score => score + CANDY_SCORE);
 		setShowFX(true);
 		setScoreFxList(list => [
@@ -86,7 +88,7 @@ const Candy = ({ color, id }: CandyProps) => {
 			{
 				color: 'white',
 				key: uuid(),
-				position: [(getItemColumnIndex(1) - 1) * 100, (getItemRowIndex(1) - 1) * 100],
+				position: [(getItemColumnIndex(currentIndex.current) - 1) * 100, (getItemRowIndex(currentIndex.current) - 1) * 100],
 				score: CANDY_SCORE,
 			},
 		]);

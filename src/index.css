@@ -1,3 +1,4 @@
+@import url('./assets/style/tailwind-text-fill-stroke-plugin.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,6 +14,6 @@ body {
 	background-position: center;
 	background-attachment: fixed;
 	background-repeat: no-repeat;
-  background-color: #472183;
-	background-image: url("./assets/svg/page-background.svg");
+	background-color: #472183;
+	background-image: url('./assets/svg/page-background.svg');
 }

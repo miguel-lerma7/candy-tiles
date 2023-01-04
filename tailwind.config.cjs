@@ -27,6 +27,18 @@ module.exports = {
 			'neu-10': '#1F2933',
 		},
 
+		textFillColor: theme => theme('borderColor'),
+		textStrokeColor: theme => theme('borderColor'),
+		textStrokeWidth: theme => theme('borderWidth'),
+		paintOrder: {
+			'fsm': { paintOrder: 'fill stroke markers' },
+			'fms': { paintOrder: 'fill markers stroke' },
+			'sfm': { paintOrder: 'stroke fill markers' },
+			'smf': { paintOrder: 'stroke markers fill' },
+			'mfs': { paintOrder: 'markers fill stroke' },
+			'msf': { paintOrder: 'markers stroke fill' },
+		},
+
 		extend: {
 			fontFamily: {
 				Roboto: ['Roboto'],
@@ -81,7 +93,6 @@ module.exports = {
 				inCubic: 'cubic-bezier(0.32, 0, 0.67, 0)',
 				outCubic: 'cubic-bezier(0.33, 1, 0.68, 1)',
 				inOutCubic: 'cubic-bezier(0.65, 0, 0.35, 1)',
-				outCubic: 'cubic-bezier(0.33, 1, 0.68, 1)',
 				inQuart: 'cubic-bezier(0.5, 0, 0.75, 0)',
 				outQuart: 'cubic-bezier(0.25, 1, 0.5, 1)',
 				inOutQuart: 'cubic-bezier(0.76, 0, 0.24, 1)',
@@ -106,5 +117,5 @@ module.exports = {
 			xl: { max: '1280px' },
 		},
 	},
-	plugins: [],
+	plugins: [require('tailwindcss-text-fill-stroke')],
 };

@@ -1,0 +1,47 @@
+.text-fill { -webkit-text-fill-color: #e0e0e0 }
+.text-fill-transparent { -webkit-text-fill-color: transparent }
+.text-fill-black { -webkit-text-fill-color: #000 }
+.text-fill-white { -webkit-text-fill-color: #fff }
+
+.text-stroke { -webkit-text-stroke-color: #e0e0e0 }
+.text-stroke-transparent { -webkit-text-stroke-color: transparent }
+.text-stroke-black { -webkit-text-stroke-color: #000 }
+.text-stroke-white { -webkit-text-stroke-color: #fff }
+
+.text-stroke { -webkit-text-stroke-width: 1px }
+.text-stroke-0 { -webkit-text-stroke-width: 0 }
+.text-stroke-2 { -webkit-text-stroke-width: 2px }
+.text-stroke-4 { -webkit-text-stroke-width: 4px }
+.text-stroke-8 { -webkit-text-stroke-width: 8px }
+
+.paint-fsm { paint-order: fill stroke markers }
+.paint-fms { paint-order: fill markers stroke }
+.paint-sfm { paint-order: stroke fill markers }
+.paint-smf { paint-order: stroke markers fill }
+.paint-mfs { paint-order: markers fill stroke }
+.paint-msf { paint-order: markers stroke fill }
+
+@media (min-width: 640px) {
+  .sm\:text-fill { -webkit-text-fill-color: #e0e0e0 }
+  .sm\:text-fill-transparent { -webkit-text-fill-color: transparent }
+  .sm\:text-fill-black { -webkit-text-fill-color: #000 }
+  .sm\:text-fill-white { -webkit-text-fill-color: #fff }
+
+  .sm\:text-stroke { -webkit-text-stroke-color: #e0e0e0 }
+  .sm\:text-stroke-transparent { -webkit-text-stroke-color: transparent }
+  .sm\:text-stroke-black { -webkit-text-stroke-color: #000 }
+  .sm\:text-stroke-white { -webkit-text-stroke-color: #fff }
+
+  .sm\:text-stroke { -webkit-text-stroke-width: 1px }
+  .sm\:text-stroke-0 { -webkit-text-stroke-width: 0 }
+  .sm\:text-stroke-2 { -webkit-text-stroke-width: 2px }
+  .sm\:text-stroke-4 { -webkit-text-stroke-width: 4px }
+  .sm\:text-stroke-8 { -webkit-text-stroke-width: 8px }
+
+  .sm\:paint-fsm { paint-order: fill stroke markers }
+  .sm\:paint-fms { paint-order: fill markers stroke }
+  .sm\:paint-sfm { paint-order: stroke fill markers }
+  .sm\:paint-smf { paint-order: stroke markers fill }
+  .sm\:paint-mfs { paint-order: markers fill stroke }
+  .sm\:paint-msf { paint-order: markers stroke fill }
+}

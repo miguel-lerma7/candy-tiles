@@ -8,7 +8,7 @@ const ScoreFXContainer = () => {
 	return (
 		<div className='pointer-events-none grid absolute top-0 left-0 w-full h-full'>
 			{scoreFxList.map(score => (
-				<ScoreFX color='' score={10} key={score.key} position={score.position}></ScoreFX>
+				<ScoreFX color='' score={score.score} key={score.key} position={score.position} id={score.key}></ScoreFX>
 			))}
 		</div>
 	);

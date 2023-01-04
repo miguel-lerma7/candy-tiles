@@ -10,7 +10,6 @@ import SuperCandy from './level-items/SuperCandy';
 import { liveItemsIds } from './ItemGrid';
 import anime from 'animejs';
 
-
 type ItemPosition = {
 	x: number;
 	y: number;
@@ -20,7 +19,7 @@ type LevelItemProps = {
 	initialIndex: number;
 };
 
-const getItemComponent = (item: LevelItem | null): JSX.Element => {	
+const getItemComponent = (item: LevelItem | null): JSX.Element => {
 	const id = item?.key || '';
 	switch (item?.type) {
 		case 'Candy':
@@ -59,8 +58,6 @@ const animatePosition = (element: HTMLElement, position: ItemPosition): void => 
 
 const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	const levelItems = useRecoilValue(levelItemsState);
-	//const renderedLevelItem = useRecoilValue(renderedLevelItemsState(initialIndex));
-
 	const [levelItemTarget, setLevelItemTarget] = useState<LevelItem | null>(levelItems[initialIndex]);
 
 	const elementRef = useRef<HTMLDivElement | null>(null);
@@ -75,7 +72,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	}, []);
 
 	useEffectAfterFirstRender(() => {
-		updatePosition();     
+		updatePosition();
 		emptyTargetRef.current && spawnItem();
 	}, [levelItems]);
 
@@ -118,7 +115,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 
 	const getItemIndex = (): number => {
 		const index = levelItems.findIndex(x => x?.key === levelItemTarget?.key);
-		emptyTargetRef.current = index < 0;
+		emptyTargetRef.current = index < 0;		
 		return index;
 	};
 

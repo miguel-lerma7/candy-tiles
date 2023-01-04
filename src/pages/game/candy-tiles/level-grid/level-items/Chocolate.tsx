@@ -8,6 +8,9 @@ import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import { latestSwappedCandyColor } from '../LevelManager';
 import anime from 'animejs';
 import { scoreState } from '../../../../../recoil/atoms/score';
+import { scoreFxListState } from '../../../../../recoil/atoms/scoreFxList';
+import uuid from 'react-uuid';
+import { getItemColumnIndex, getItemRowIndex } from '../../../../../game-algorithms/tile-matching';
 
 const chocolateMatchSound = new Audio(chocolateMatchSFX);
 chocolateMatchSound.volume = 0.5;
@@ -35,7 +38,9 @@ const Chocolate = ({ id }: ChocolateProps) => {
 	const levelItems = useRecoilValue(levelItemsState);
 	const elementRef = useRef<HTMLImageElement | null>(null);
 	const setScore = useSetRecoilState(scoreState);
- 
+	const setScoreFxList = useSetRecoilState(scoreFxListState);
+	const currentIndex = useRef(-1);
+
 	useEffect(() => {
 		animateItemSpawn(elementRef.current as HTMLElement);
 	}, []);
@@ -43,12 +48,22 @@ const Chocolate = ({ id }: ChocolateProps) => {
 	useEffectAfterFirstRender(() => {
 		const itemMatched = !levelItems.some(x => x?.key === id);
 		if (itemMatched && !itemUsedRef.current) onItemMatch();
+		currentIndex.current = levelItems.findIndex(x => x?.key === id);
 	}, [levelItems]);
 
 	const onItemMatch = () => {
 		setShowFX(true);
 		setScore(score => score + CHOCHOLATE_SCORE);
 		chocolateMatchSound.play();
+		setScoreFxList(list => [
+			...list,
+			{
+				color: 'white',
+				key: uuid(),
+				position: [(getItemColumnIndex(currentIndex.current) - 1) * 100, (getItemRowIndex(currentIndex.current) - 1) * 100],
+				score: CHOCHOLATE_SCORE,
+			},
+		]);
 	};
 
 	return showFX ? (
