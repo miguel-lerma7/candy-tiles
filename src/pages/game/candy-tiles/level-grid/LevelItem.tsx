@@ -7,8 +7,9 @@ import { levelItemsState } from '../../../../recoil/atoms/levelItems';
 import Candy from './level-items/Candy';
 import Chocolate from './level-items/Chocolate';
 import SuperCandy from './level-items/SuperCandy';
-import { liveItemsIds } from './ItemGrid';
+import { liveItemsIds, removeLiveItem } from './ItemGrid';
 import anime from 'animejs';
+import IceCream from './level-items/IceCream';
 
 type ItemPosition = {
 	x: number;
@@ -19,17 +20,20 @@ type LevelItemProps = {
 	initialIndex: number;
 };
 
-const getItemComponent = (item: LevelItem | null): JSX.Element => {
+const getItemComponent = (item: LevelItem | null, index: number): JSX.Element => {
 	const id = item?.key || '';
 	switch (item?.type) {
 		case 'Candy':
-			return <Candy color={item.color} id={id} key={id}></Candy>;
+			return <Candy color={item.color} id={id} key={id} index={index}></Candy>;
 
 		case 'SuperCandy':
-			return <SuperCandy color={item.color} id={id} key={id}></SuperCandy>;
+			return <SuperCandy color={item.color} id={id} key={id} index={index}></SuperCandy>;
 
 		case 'Chocolate':
-			return <Chocolate id={id} key={id}></Chocolate>;
+			return <Chocolate id={id} key={id} index={index}></Chocolate>;
+
+		case 'IceCream':
+			return <IceCream id={id} key={id} index={index}></IceCream>;
 
 		default:
 			return <div></div>;
@@ -65,6 +69,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	const columnIndexRef = useRef<number>(0);
 	const positionRef = useRef<ItemPosition>({ x: 0, y: 0 });
 	const emptyTargetRef = useRef(false);
+	const currentIndexRef = useRef(initialIndex);
 
 	useEffect(() => {
 		const validItem = typeof levelItemTarget?.key === 'string';
@@ -74,6 +79,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	useEffectAfterFirstRender(() => {
 		updatePosition();
 		emptyTargetRef.current && spawnItem();
+		currentIndexRef.current = levelItems.findIndex(x => x?.key === levelItemTarget?.key);
 	}, [levelItems]);
 
 	useEffect(() => {
@@ -83,19 +89,16 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 	}, [levelItemTarget]);
 
 	const spawnItem = () => {
-		liveItemsIds.splice(
-			liveItemsIds.findIndex(x => x === levelItemTarget?.key),
-			0
-		);
-
+		removeLiveItem(levelItemTarget?.key || '');
 		const newTarget = levelItems.filter(x => typeof x?.key === 'string').find(y => !liveItemsIds.includes(y?.key || ''));
 		const newTargetIsValid = newTarget !== undefined && typeof newTarget?.key === 'string';
 
 		if (!newTargetIsValid) return;
 
+		liveItemsIds.push(newTarget?.key || '');
+		currentIndexRef.current = levelItems.findIndex(x => x?.key === newTarget.key);
 		setLevelItemTarget(newTarget);
 		emptyTargetRef.current = false;
-		liveItemsIds.push(newTarget?.key || '');
 	};
 
 	const updateGridPosition = (): void => {
@@ -115,7 +118,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 
 	const getItemIndex = (): number => {
 		const index = levelItems.findIndex(x => x?.key === levelItemTarget?.key);
-		emptyTargetRef.current = index < 0;		
+		emptyTargetRef.current = index < 0;
 		return index;
 	};
 
@@ -128,7 +131,7 @@ const LevelItem = ({ initialIndex }: LevelItemProps) => {
 			}}
 			ref={elementRef}
 		>
-			{levelItemTarget !== null ? getItemComponent(levelItemTarget) : <></>}
+			{levelItemTarget !== null ? getItemComponent(levelItemTarget, currentIndexRef.current) : <></>}
 		</div>
 	);
 };

@@ -71,7 +71,7 @@ export const levelList: LevelLayout[] = [
 			{ type: 'SuperCandy', color: 'Orange' },
 			{ type: 'Candy', color: 'Purple' },
 			{ type: 'Candy', color: 'Orange' },
-			{ type: 'Candy', color: 'Yellow' },
+			{ type: 'IceCream' },
 			{ type: 'Candy', color: 'Purple' },
 			{ type: 'Candy', color: 'Yellow' },
 			{ type: 'Candy', color: 'Yellow' },

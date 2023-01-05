@@ -1,4 +1,5 @@
 @import url('./assets/style/tailwind-text-fill-stroke-plugin.css');
+@import url('./assets/style/fonts.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

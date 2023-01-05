@@ -44,16 +44,16 @@ const SUPER_CANDY_SCORE = 50;
 type SuperCandyProps = {
 	color: CandyColor;
 	id: string;
+	index: number;
 };
 
-const SuperCandy = ({ color, id }: SuperCandyProps) => {
+const SuperCandy = ({ color, id, index }: SuperCandyProps) => {
 	const [showFX, setShowFX] = useState(false);
 	const itemUsedRef = useRef(false);
 	const elementRef = useRef<HTMLImageElement | null>(null);
 	const levelItems = useRecoilValue(levelItemsState);
 	const setScore = useSetRecoilState(scoreState);
 	const setScoreFxList = useSetRecoilState(scoreFxListState);
-	const currentIndex = useRef(-1);
 
 	useEffect(() => {
 		animateItemSpawn(elementRef.current as HTMLElement);
@@ -62,7 +62,6 @@ const SuperCandy = ({ color, id }: SuperCandyProps) => {
 	useEffectAfterFirstRender(() => {
 		const itemMatched = !levelItems.some(x => x?.key === id);
 		itemMatched && !itemUsedRef.current && onItemMatch();
-		currentIndex.current = levelItems.findIndex(x => x?.key === id);
 	}, [levelItems]);
 
 	const onItemMatch = () => {
@@ -72,9 +71,9 @@ const SuperCandy = ({ color, id }: SuperCandyProps) => {
 		setScoreFxList(list => [
 			...list,
 			{
-				color: 'white',
+				color,
 				key: uuid(),
-				position: [(getItemColumnIndex(currentIndex.current) - 1) * 100, (getItemRowIndex(currentIndex.current) - 1) * 100],
+				position: [(getItemColumnIndex(index) - 1) * 100, (getItemRowIndex(index) - 1) * 100],
 				score: SUPER_CANDY_SCORE,
 			},
 		]);

@@ -12,7 +12,7 @@ const ScoreBar = () => {
 		<div className='flex flex-col'>
 			<div className='h-[30px] w-[150px] bg-purple p-[5px] relative rounded-lg '>
 				<span className='bg-blue block w-full h-full scale-x-50 origin-left rounded-lg border-light-blue'></span>
-				<span className='text-bone font-LilyScriptOne text-[13px] absolute block top-0 left-0 right-0 bottom-0 text-center leading-[30px] font-medium'>
+				<span className='text-bone font-YellowCandy text-[13px] absolute block top-0 left-0 right-0 bottom-0 text-center leading-[30px] font-medium'>
 					{score}
 				</span>
 				<span className={`absolute left-[20%] top-[115%] text-[#ffae17] ${starLine}`}>

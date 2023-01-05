@@ -1,7 +1,7 @@
 export {};
 
 declare global {
-	type CandyColor = 'Red' | 'Orange' | 'Yellow' | 'Green' | 'Blue' | 'Purple';
+	type CandyColor = 'Red' | 'Orange' | 'Yellow' | 'Green' | 'Blue' | 'Purple' | 'White';
 
 	type Candy = {
 		color: CandyColor;
@@ -20,11 +20,16 @@ declare global {
 		key?: string;
 	};
 
+	type IceCream = {
+		type: 'IceCream';
+		key?: string;
+	};
+
 	type Tile = {
 		type: 'Normal' | 'Frozen' | 'Rock';
 	};
 
-	type LevelItem = Candy | SuperCandy | Chocolate | null;
+	type LevelItem = Candy | SuperCandy | Chocolate | IceCream | null;
 	type LevelTile = Tile | null;
 
 	type MatchDetail = {
@@ -59,8 +64,8 @@ declare global {
 
 	type ScoreFx = {
 		position: [number, number];
-		color: string;
+		color: CandyColor;
 		score: number;
-		key: string
+		key: string;
 	};
 }

@@ -2,11 +2,12 @@ import anime from 'animejs';
 import { useEffect, useRef } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { COLUMN_NUMBER, ROW_NUMBER } from '../../../../../config';
+import candyHexColors from '../../../../../data/candy-hex-colors';
 import { scoreFxListState } from '../../../../../recoil/atoms/scoreFxList';
 
 type ScoreFXProps = {
 	score: number;
-	color: string;
+	color: CandyColor;
 	position: [number, number];
 	id: string;
 };
@@ -39,7 +40,13 @@ const ScoreFX = ({ score, color, position, id }: ScoreFXProps) => {
 				height: `calc(100%/${ROW_NUMBER})`,
 			}}
 		>
-			<span ref={scoreElementRef} className='text-white text-[24px] font-bold text-center m-auto font-LilyScriptOne'>
+			<span
+				ref={scoreElementRef}
+				className='text-[200%] font-bold text-center m-auto font-YellowCandy'
+				style={{
+					color: candyHexColors[color],
+				}}
+			>
 				{score}
 			</span>
 		</div>

@@ -29,9 +29,10 @@ const CHOCHOLATE_SCORE = 100;
 
 type ChocolateProps = {
 	id: string;
+	index: number;
 };
 
-const Chocolate = ({ id }: ChocolateProps) => {
+const Chocolate = ({ id, index }: ChocolateProps) => {
 	const [scale] = useState(0);
 	const [showFX, setShowFX] = useState(false);
 	const itemUsedRef = useRef(false);
@@ -39,7 +40,6 @@ const Chocolate = ({ id }: ChocolateProps) => {
 	const elementRef = useRef<HTMLImageElement | null>(null);
 	const setScore = useSetRecoilState(scoreState);
 	const setScoreFxList = useSetRecoilState(scoreFxListState);
-	const currentIndex = useRef(-1);
 
 	useEffect(() => {
 		animateItemSpawn(elementRef.current as HTMLElement);
@@ -48,7 +48,6 @@ const Chocolate = ({ id }: ChocolateProps) => {
 	useEffectAfterFirstRender(() => {
 		const itemMatched = !levelItems.some(x => x?.key === id);
 		if (itemMatched && !itemUsedRef.current) onItemMatch();
-		currentIndex.current = levelItems.findIndex(x => x?.key === id);
 	}, [levelItems]);
 
 	const onItemMatch = () => {
@@ -58,9 +57,9 @@ const Chocolate = ({ id }: ChocolateProps) => {
 		setScoreFxList(list => [
 			...list,
 			{
-				color: 'white',
+				color: 'White',
 				key: uuid(),
-				position: [(getItemColumnIndex(currentIndex.current) - 1) * 100, (getItemRowIndex(currentIndex.current) - 1) * 100],
+				position: [(getItemColumnIndex(index) - 1) * 100, (getItemRowIndex(index) - 1) * 100],
 				score: CHOCHOLATE_SCORE,
 			},
 		]);
@@ -74,9 +73,6 @@ const Chocolate = ({ id }: ChocolateProps) => {
 			ref={elementRef}
 			src={chocolateSprite}
 			className='block w-full h-full m-0 select-none pointer-events-none duration-200'
-			style={{
-				transform: `scale(${scale})`,
-			}}
 		></img>
 	);
 };

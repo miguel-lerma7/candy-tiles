@@ -47,6 +47,7 @@ module.exports = {
 				Lato: ['Lato'],
 				Raleway: ['Raleway'],
 				LilyScriptOne: ['Lily Script One'],
+				YellowCandy: ['YellowCandy'],
 				System: [
 					'-apple-system',
 					'BlinkMacSystemFont',
