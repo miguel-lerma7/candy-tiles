@@ -6,7 +6,7 @@ import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstR
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import { latestSwappedCandyColor } from '../LevelManager';
-import anime from 'animejs';
+import anime, { AnimeInstance } from 'animejs';
 import { scoreState } from '../../../../../recoil/atoms/score';
 import { scoreFxListState } from '../../../../../recoil/atoms/scoreFxList';
 import uuid from 'react-uuid';
@@ -15,14 +15,27 @@ import { getItemColumnIndex, getItemRowIndex } from '../../../../../game-algorit
 const chocolateMatchSound = new Audio(chocolateMatchSFX);
 chocolateMatchSound.volume = 0.5;
 
-const animateItemSpawn = (element: HTMLElement): void => {
+const animateItemSpawn = (element: HTMLElement, onComplete: () => void): void => {
 	anime({
 		targets: element,
-		scale: [0, 2, 1],
-		rotate: [360, 0],
+		scale: [0, 1.2, 1],
 		easing: 'easeOutBack',
 		duration: 500,
+		complete: onComplete,
 	});
+};
+
+const animateChocolateScale = (element: HTMLElement): AnimeInstance => {
+	const animation = anime({
+		targets: element,
+		rotate: [0, 360],
+		duration: 10000,
+		loop: true,
+		easing: 'linear',
+		direction: 'normal',
+	});
+
+	return animation;
 };
 
 const CHOCHOLATE_SCORE = 100;
@@ -33,16 +46,22 @@ type ChocolateProps = {
 };
 
 const Chocolate = ({ id, index }: ChocolateProps) => {
-	const [scale] = useState(0);
 	const [showFX, setShowFX] = useState(false);
 	const itemUsedRef = useRef(false);
 	const levelItems = useRecoilValue(levelItemsState);
 	const elementRef = useRef<HTMLImageElement | null>(null);
+	const spinAnimationRef = useRef<null | AnimeInstance>(null);
 	const setScore = useSetRecoilState(scoreState);
 	const setScoreFxList = useSetRecoilState(scoreFxListState);
 
 	useEffect(() => {
-		animateItemSpawn(elementRef.current as HTMLElement);
+		animateItemSpawn(elementRef.current as HTMLElement, () => {
+			spinAnimationRef.current = animateChocolateScale(elementRef.current as HTMLElement);
+		});
+
+		return () => {
+			anime.remove(spinAnimationRef.current);
+		};
 	}, []);
 
 	useEffectAfterFirstRender(() => {
@@ -68,12 +87,7 @@ const Chocolate = ({ id, index }: ChocolateProps) => {
 	return showFX ? (
 		<LevelItemFX color={latestSwappedCandyColor} maskSrc='/img/fx/triangleShape.png'></LevelItemFX>
 	) : (
-		<img
-			data-chocolate
-			ref={elementRef}
-			src={chocolateSprite}
-			className='block w-full h-full m-0 select-none pointer-events-none duration-200'
-		></img>
+		<img data-chocolate ref={elementRef} src={chocolateSprite} className='block w-full h-full m-0 select-none pointer-events-none'></img>
 	);
 };
 

@@ -37,7 +37,13 @@ const FrostTile = ({ index }: TileProps) => {
 
 	return (
 		<div className='relative bg-black/25 m-[2%] hover:invert duration-200 select-none rounded' data-index={index} data-tile>
-			<img src={damaged ? '/img/tiles/frost.png' : '/img/tiles/frost2.png'} className='pointer-events-none'></img>
+			<img
+				src={'/img/tiles/frost2.png'}
+				className='pointer-events-none'
+				style={{
+					opacity: damaged ? 0.75 : 1,
+				}}
+			></img>
 			<span className='absolute bottom-0 right-0 text-[12px] text-black font-bold'>{index}</span>
 		</div>
 	);

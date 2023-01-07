@@ -10,7 +10,7 @@ import LevelItemFX from '../fx/LevelItemFX';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
-import anime from 'animejs';
+import anime, { AnimeInstance } from 'animejs';
 import { scoreState } from '../../../../../recoil/atoms/score';
 import { scoreFxListState } from '../../../../../recoil/atoms/scoreFxList';
 import uuid from 'react-uuid';
@@ -29,14 +29,27 @@ const superCandyMatchSound = new Audio(superCandyMatchSFX);
 
 export const CandyColors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 
-const animateItemSpawn = (element: HTMLElement): void => {
+const animateItemSpawn = (element: HTMLElement, onComplete: () => void): void => {
 	anime({
 		targets: element,
 		scale: [0, 1],
-		rotate: [180, 0],
+		rotate: [180, -10],
 		easing: 'easeOutBack',
 		duration: 750,
+		complete: onComplete,
 	});
+};
+
+const animateSuperCandyRotation = (element: HTMLElement): AnimeInstance => {	
+	const animation = anime({
+		targets: element,
+		rotate: [-10, 10],
+		duration: 1500,
+		easing: 'easeInOutCubic',
+		direction: 'alternate',
+		loop: true,
+	});
+	return animation;
 };
 
 const SUPER_CANDY_SCORE = 50;
@@ -52,11 +65,18 @@ const SuperCandy = ({ color, id, index }: SuperCandyProps) => {
 	const itemUsedRef = useRef(false);
 	const elementRef = useRef<HTMLImageElement | null>(null);
 	const levelItems = useRecoilValue(levelItemsState);
+	const rotateAnimationRef = useRef<null | AnimeInstance>(null);
 	const setScore = useSetRecoilState(scoreState);
 	const setScoreFxList = useSetRecoilState(scoreFxListState);
 
 	useEffect(() => {
-		animateItemSpawn(elementRef.current as HTMLElement);
+		animateItemSpawn(elementRef.current as HTMLElement, () => {
+			rotateAnimationRef.current = animateSuperCandyRotation(elementRef.current as HTMLElement);
+		});
+
+		return () => {
+			anime.remove(rotateAnimationRef.current);
+		};
 	}, []);
 
 	useEffectAfterFirstRender(() => {
@@ -87,7 +107,7 @@ const SuperCandy = ({ color, id, index }: SuperCandyProps) => {
 			data-candy
 			data-color={color}
 			src={candyImages[color]}
-			className='block w-full h-full m-0 select-none pointer-events-none duration-200'
+			className='block w-full h-full m-0 select-none pointer-events-none'
 		></img>
 	);
 };
