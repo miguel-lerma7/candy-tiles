@@ -2,6 +2,7 @@ import uuid from 'react-uuid';
 import { COLUMN_NUMBER, ROW_NUMBER } from '../config';
 import { findAllIndeces, getArrayNumberSum, getNumberRangeArray, getNumberSequenceArray } from '../utils/array';
 export const CANDY_COLOR_LIST: string[] = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
+export const CANDY_TYPES_ARRAY = ['Candy', 'SuperCandy'];
 
 export const getItemRowIndex = (index: number): number => Math.ceil((index + 1) / COLUMN_NUMBER);
 export const getItemColumnIndex = (index: number): number => index + 1 - (getItemRowIndex(index) - 1) * ROW_NUMBER;
@@ -64,10 +65,8 @@ const getCandyMatchings = (candy: CandyInLevel, items: readonly LevelItem[]): Ma
 	return { index: candy.index, matched, up, right, down, left };
 };
 
-const candyTypesArray = ['Candy', 'SuperCandy'];
-
 const getMatchGroups = (matchList: MatchDetail[], itemsList: readonly LevelItem[]): MatchGroup[] => {
-	const matchedCandyList = matchList.filter(x => x.matched && candyTypesArray.includes(itemsList[x.index]?.type || ''));
+	const matchedCandyList = matchList.filter(x => x.matched && CANDY_TYPES_ARRAY.includes(itemsList[x.index]?.type || ''));
 	if (matchedCandyList.length === 0) return [];
 
 	const getAdjacentsWithSameColor = (group: MatchGroup, index: number) => {
@@ -99,7 +98,7 @@ const getMatchGroups = (matchList: MatchDetail[], itemsList: readonly LevelItem[
 export const checkForMatchings = (items: readonly LevelItem[]): MatchResult => {
 	const candies = [...structuredClone(items)]
 		.map((x, index) => ({ ...x, index }))
-		.filter(x => candyTypesArray.includes((x as LevelItem)?.type || '')) as CandyInLevel[];
+		.filter(x => CANDY_TYPES_ARRAY.includes((x as LevelItem)?.type || '')) as CandyInLevel[];
 	const matchingList: MatchDetail[] = [];
 	candies.forEach(candy => matchingList.push(getCandyMatchings(candy, items)));
 
@@ -243,4 +242,11 @@ export const getMatchGroupCenterIndex = (matchGroup: MatchGroup, matchList: Matc
 		(x, index) => adjacentSumsList[index] === greatestAdjacentSum && matchBalanceList[index] === mostBalancedMatch
 	);
 	return groupCenterIndex || -1;
+};
+
+export const matchAllCandiesOfColor = (matchList: readonly MatchDetail[], itemList: readonly LevelItem[], color: CandyColor): MatchDetail[] => {
+	return matchList.map(matchDetail => {
+		(itemList[matchDetail.index] as Candy).color === color && (matchDetail.matched = true);
+		return matchDetail;
+	});
 };

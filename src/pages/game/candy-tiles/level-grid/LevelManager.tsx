@@ -4,10 +4,12 @@ import { ANIMATION_TIME_MS } from '../../../../config';
 import { levelList } from '../../../../data/level-layouts';
 import {
 	allTilesFilled,
+	CANDY_TYPES_ARRAY,
 	checkForMatchings,
 	generateNewCandies,
 	getHorizontalAndVerticalItems,
 	getMatchGroupCenterIndex,
+	matchAllCandiesOfColor,
 	repositionItems,
 } from '../../../../game-algorithms/tile-matching';
 import { levelItemsState } from '../../../../recoil/atoms/levelItems';
@@ -20,6 +22,7 @@ import { getLevelItemByFusion } from '../../../../game-algorithms/candy-fusions'
 import { allowSwapState } from '../../../../recoil/atoms/allowSwap';
 import { matchListState } from '../../../../recoil/atoms/matchList';
 import uuid from 'react-uuid';
+import { levelMovesState } from '../../../../recoil/atoms/levelMoves';
 
 const matchSound = new Audio(matchSFX);
 const fusionMatchSound = new Audio(fusionMatchSFX);
@@ -96,6 +99,7 @@ const LevelManager = () => {
 	const [swappedItems, setSwappedItems] = useRecoilState(swappedItemsState);
 	const [levelItems, setLevelItems] = useRecoilState(levelItemsState);
 	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
+	const [levelMoves, setLevelMoves] = useRecoilState(levelMovesState);
 	const setAllowSwap = useSetRecoilState(allowSwapState);
 	const setMatchList = useSetRecoilState(matchListState);
 
@@ -105,6 +109,7 @@ const LevelManager = () => {
 		const initialItems = getInitialItems(0);
 		setLevelTiles(levelList[0].tiles);
 		setLevelItems(initialItems);
+		setLevelMoves({ done: 0, total: 10, spendAllMoves: false });
 	}, []);
 
 	useEffect(() => swapItems(false), [swappedItems]);
@@ -142,6 +147,8 @@ const LevelManager = () => {
 		matchInfo = checkChocolateSwap(matchInfo, itemList);
 
 		if (matchInfo.thereWereMatches || !allTilesFilled(itemList, levelTiles)) {
+			itemsWereSwapped.current &&
+				setLevelMoves(moves => ({ done: moves.done + 1, total: moves.total, spendAllMoves: moves.done + 1 >= moves.total }));
 			setSwappedItems([null, null]);
 			itemsWereSwapped.current = false;
 			playMatchSFX();
@@ -170,16 +177,14 @@ const LevelManager = () => {
 		const otherItemSwapIndex = swappedItems.find(x => x !== swappedChocolateIndex);
 		const otherItem = itemList.find((x, i) => i === otherItemSwapIndex);
 
-		if (swappedChocolateIndex < 0 || !itemsWereSwapped.current || otherItem?.type === 'Chocolate') return matchInfo;
+		const canSwap = swappedChocolateIndex < 0 || !itemsWereSwapped.current || !CANDY_TYPES_ARRAY.includes(otherItem?.type || '');
+		if (canSwap) return matchInfo;
 
 		const otherItemIndex = swappedItems.find(x => x !== swappedChocolateIndex);
 		const otherItemColor: CandyColor = (levelItems[swappedChocolateIndex] as Candy).color || DEFAULT_SWAPPED_CANDY_COLOR;
 		latestSwappedCandyColor = otherItemColor;
 
-		matchInfo.matchingList = matchInfo.matchingList.map(matchDetail => {
-			(levelItems[matchDetail.index] as Candy).color === otherItemColor && (matchDetail.matched = true);
-			return matchDetail;
-		});
+		matchInfo.matchingList = matchAllCandiesOfColor(matchInfo.matchingList, itemList, otherItemColor);
 
 		const matchProps = { down: 0, left: 0, right: 0, up: 0 };
 		matchInfo.matchingList.push({ index: swappedChocolateIndex, matched: true, ...matchProps });

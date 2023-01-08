@@ -11,7 +11,7 @@ const ItemGrid = () => {
 	const tilesLayout = levelList[0].tiles;
 
 	return (
-		<div className='absolute top-0 left-0 w-full h-full pointer-events-none'>
+		<div className='absolute top-0 left-0 w-full h-full pointer-events-none duration-1000'>
 			{Array(TILE_COUNT)
 				.fill('')
 				.map((x, index) => {

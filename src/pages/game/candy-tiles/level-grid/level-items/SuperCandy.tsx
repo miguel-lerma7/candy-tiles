@@ -33,7 +33,7 @@ const animateItemSpawn = (element: HTMLElement, onComplete: () => void): void =>
 	anime({
 		targets: element,
 		scale: [0, 1],
-		rotate: [180, -10],
+		rotate: [180, -5],
 		easing: 'easeOutBack',
 		duration: 750,
 		complete: onComplete,
@@ -43,7 +43,7 @@ const animateItemSpawn = (element: HTMLElement, onComplete: () => void): void =>
 const animateSuperCandyRotation = (element: HTMLElement): AnimeInstance => {	
 	const animation = anime({
 		targets: element,
-		rotate: [-10, 10],
+		rotate: [-5, 5],
 		duration: 1500,
 		easing: 'easeInOutCubic',
 		direction: 'alternate',

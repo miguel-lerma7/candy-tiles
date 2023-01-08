@@ -41,7 +41,7 @@ const FrostTile = ({ index }: TileProps) => {
 				src={'/img/tiles/frost2.png'}
 				className='pointer-events-none'
 				style={{
-					opacity: damaged ? 0.75 : 1,
+					opacity: damaged ? 0.6 : 1,
 				}}
 			></img>
 			<span className='absolute bottom-0 right-0 text-[12px] text-black font-bold'>{index}</span>

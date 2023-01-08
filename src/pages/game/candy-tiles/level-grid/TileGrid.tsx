@@ -4,6 +4,7 @@ import { COLUMN_NUMBER, ROW_NUMBER } from '../../../../config';
 import { useLevelContext } from '../../../../context/LevelContext';
 import { tilesAreAdjacent } from '../../../../game-algorithms/tile-matching';
 import { allowSwapState } from '../../../../recoil/atoms/allowSwap';
+import { levelMovesState } from '../../../../recoil/atoms/levelMoves';
 import { levelTilesState } from '../../../../recoil/atoms/levelTiles';
 import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
 import tileClickSFX from './../../../../assets/audio/tileClick.mp3';
@@ -39,6 +40,7 @@ const TileGrid = () => {
 	const setSwappedItems = useSetRecoilState(swappedItemsState);
 	const allowSwap = useRecoilValue(allowSwapState);
 	const tileGridElementRef = useRef<HTMLDivElement | null>(null);
+	const levelMoves = useRecoilValue(levelMovesState);
 
 	useEffect(() => {
 		tileClickAudio.volume = 0.5;
@@ -49,7 +51,8 @@ const TileGrid = () => {
 	}, [allowSwap]);
 
 	const updateGridInteraction = () => {
-		if (tileGridElementRef.current) tileGridElementRef.current.style.pointerEvents = allowSwap ? 'all' : 'none';
+		if (tileGridElementRef.current)
+			tileGridElementRef.current.style.pointerEvents = allowSwap && !levelMoves.spendAllMoves ? 'all' : 'none';
 	};
 
 	const handleMouseDown = (e: React.MouseEvent): void => {
@@ -83,7 +86,10 @@ const TileGrid = () => {
 	return (
 		<div
 			className='grid absolute top-0 left-0 w-full h-full'
-			style={{ gridTemplateColumns: `repeat(${COLUMN_NUMBER}, 1fr)`, gridTemplateRows: `repeat(${ROW_NUMBER}, 1fr)` }}
+			style={{
+				gridTemplateColumns: `repeat(${COLUMN_NUMBER}, 1fr)`,
+				gridTemplateRows: `repeat(${ROW_NUMBER}, 1fr)`,
+			}}
 			onMouseDown={handleMouseDown}
 			onMouseUp={handleMouseUp}
 			onMouseOver={handleMouseOver}

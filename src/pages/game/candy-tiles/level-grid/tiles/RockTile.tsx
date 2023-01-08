@@ -42,7 +42,7 @@ const RockTile = ({ index }: TileProps) => {
 				src='/img/tiles/rock2.png'
 				className='pointer-events-none'
 				style={{
-					opacity: damaged ? 0.75 : 1,
+					opacity: damaged ? 0.6 : 1,
 				}}
 			></img>
 			<span className='absolute bottom-0 right-0 text-[12px] text-white/50 font-bold hidden'>{index}</span>
