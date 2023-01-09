@@ -1,10 +1,10 @@
 import { useRef } from 'react';
-import TileGrid from './TileGrid';
-import ItemGrid from './ItemGrid';
-import LevelManager from './LevelManager';
+import TileGrid from './grids/TileGrid';
+import ItemGrid from './grids/ItemGrid';
+import LevelManager from './level-manager/LevelManager';
 import DelayComponent from '../../../../components/DelayComponent';
 import { ANIMATION_TIME_MS } from '../../../../config';
-import ScoreFXContainer from './fx/ScoreFXContainer';
+import ScoreFXGrid from './grids/ScoreFXGrid';
 import { useRecoilValue } from 'recoil';
 import { levelMovesState } from '../../../../recoil/atoms/levelMoves';
 
@@ -25,7 +25,7 @@ const LevelContainer = () => {
 			<DelayComponent delayMs={ANIMATION_TIME_MS}>
 				<ItemGrid></ItemGrid>
 			</DelayComponent>
-			<ScoreFXContainer></ScoreFXContainer>
+			<ScoreFXGrid></ScoreFXGrid>
 		</section>
 	);
 };

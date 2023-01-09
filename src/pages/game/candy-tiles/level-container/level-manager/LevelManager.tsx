@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import { ANIMATION_TIME_MS } from '../../../../config';
-import { levelList } from '../../../../data/level-layouts';
+import { ANIMATION_TIME_MS } from '../../../../../config';
+import { levelList } from '../../../../../data/level-layouts';
 import {
 	allTilesFilled,
 	CANDY_TYPES_ARRAY,
@@ -11,18 +11,18 @@ import {
 	getMatchGroupCenterIndex,
 	matchAllCandiesOfColor,
 	repositionItems,
-} from '../../../../game-algorithms/tile-matching';
-import { levelItemsState } from '../../../../recoil/atoms/levelItems';
-import { levelTilesState } from '../../../../recoil/atoms/levelTiles';
-import { swappedItemsState } from '../../../../recoil/atoms/swappedItems';
-import matchSFX from './../../../../assets/audio/match.mp3';
-import fusionMatchSFX from './../../../../assets/audio/fusionMatch.mp3';
-import { delay } from '../../../../utils/delay';
-import { getLevelItemByFusion } from '../../../../game-algorithms/candy-fusions';
-import { allowSwapState } from '../../../../recoil/atoms/allowSwap';
-import { matchListState } from '../../../../recoil/atoms/matchList';
+} from '../../../../../game-algorithms/tile-matching';
+import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
+import { levelTilesState } from '../../../../../recoil/atoms/levelTiles';
+import { swappedItemsState } from '../../../../../recoil/atoms/swappedItems';
+import matchSFX from './../../../../../assets/audio/match.mp3';
+import fusionMatchSFX from './../../../../../assets/audio/fusionMatch.mp3';
+import { delay } from '../../../../../utils/delay';
+import { getLevelItemByFusion } from '../../../../../game-algorithms/candy-fusions';
+import { allowSwapState } from '../../../../../recoil/atoms/allowSwap';
+import { matchListState } from '../../../../../recoil/atoms/matchList';
 import uuid from 'react-uuid';
-import { levelMovesState } from '../../../../recoil/atoms/levelMoves';
+import { levelMovesState } from '../../../../../recoil/atoms/levelMoves';
 
 const matchSound = new Audio(matchSFX);
 const fusionMatchSound = new Audio(fusionMatchSFX);

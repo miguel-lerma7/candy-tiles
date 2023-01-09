@@ -1,5 +1,5 @@
 import LevelContextProvider from '../../context/LevelContext';
-import CandyTiles from './candy-tiles/CandyTiles';
+import CandyTiles from './candy-tiles';
 import LevelSelector from './level-selector';
 
 const GamePage = () => {

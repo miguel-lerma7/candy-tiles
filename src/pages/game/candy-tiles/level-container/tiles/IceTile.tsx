@@ -6,11 +6,12 @@ import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstR
 import { useRecoilValue, useRecoilState } from 'recoil';
 import { matchListState } from '../../../../../recoil/atoms/matchList';
 import { levelTilesState } from '../../../../../recoil/atoms/levelTiles';
+import iceTileSprite from './../../../../../assets/img/tiles/ice.png';
 
 const iceCrack1Sound = new Audio(iceCrack1SFX);
 const iceCrack2Sound = new Audio(iceCrack2SFX);
 
-const FrostTile = ({ index }: TileProps) => {
+const IceTile = ({ index }: TileProps) => {
 	const [damaged, setDamaged] = useState(false);
 	const matchList = useRecoilValue(matchListState);
 	const [levelTiles, setLevelTiles] = useRecoilState(levelTilesState);
@@ -38,7 +39,7 @@ const FrostTile = ({ index }: TileProps) => {
 	return (
 		<div className='relative bg-black/25 m-[2%] hover:invert duration-200 select-none rounded' data-index={index} data-tile>
 			<img
-				src={'/img/tiles/frost2.png'}
+				src={iceTileSprite}
 				className='pointer-events-none'
 				style={{
 					opacity: damaged ? 0.6 : 1,
@@ -49,4 +50,4 @@ const FrostTile = ({ index }: TileProps) => {
 	);
 };
 
-export default FrostTile;
+export default IceTile;

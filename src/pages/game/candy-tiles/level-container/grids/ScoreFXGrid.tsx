@@ -1,8 +1,8 @@
 import { useRecoilValue } from 'recoil';
 import { scoreFxListState } from '../../../../../recoil/atoms/scoreFxList';
-import ScoreFX from './ScoreFX';
+import ScoreFX from '../fx/ScoreFX';
 
-const ScoreFXContainer = () => {
+const ScoreFXGrid = () => {
 	const scoreFxList = useRecoilValue(scoreFxListState);
 
 	return (
@@ -14,4 +14,4 @@ const ScoreFXContainer = () => {
 	);
 };
 
-export default ScoreFXContainer;
+export default ScoreFXGrid;

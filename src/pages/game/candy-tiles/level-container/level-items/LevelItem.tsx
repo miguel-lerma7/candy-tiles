@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { ANIMATION_TIME_MS, COLUMN_NUMBER } from '../../../../config';
-import { getItemColumnIndex, getItemRowIndex } from '../../../../game-algorithms/tile-matching';
-import useEffectAfterFirstRender from '../../../../hooks/useEffectAfterFirstRender';
-import { levelItemsState } from '../../../../recoil/atoms/levelItems';
-import Candy from './level-items/Candy';
-import Chocolate from './level-items/Chocolate';
-import SuperCandy from './level-items/SuperCandy';
-import { liveItemsIds, removeLiveItem } from './ItemGrid';
+import { ANIMATION_TIME_MS, COLUMN_NUMBER } from '../../../../../config';
+import { getItemColumnIndex, getItemRowIndex } from '../../../../../game-algorithms/tile-matching';
+import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
+import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
+import Candy from './Candy';
+import Chocolate from './Chocolate';
+import SuperCandy from './SuperCandy';
+import { liveItemsIds, removeLiveItem } from '../grids/ItemGrid';
 import anime from 'animejs';
-import IceCream from './level-items/IceCream';
+import IceCream from './IceCream';
 
 type ItemPosition = {
 	x: number;

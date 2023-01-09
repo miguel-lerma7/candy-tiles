@@ -1,6 +1,6 @@
-import { TILE_COUNT } from '../../../../config';
-import { levelList } from '../../../../data/level-layouts';
-import LevelItem from './LevelItem';
+import { TILE_COUNT } from '../../../../../config';
+import { levelList } from '../../../../../data/level-layouts';
+import LevelItem from '../level-items/LevelItem';
 
 export let liveItemsIds: string[] = [];
 export const removeLiveItem = (id: string): void => {

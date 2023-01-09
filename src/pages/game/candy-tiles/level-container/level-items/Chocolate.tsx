@@ -1,11 +1,9 @@
-import chocolateSprite from './../../../../../assets/candies/chocolate.png';
+import chocolateSprite from './../../../../../assets/img/candies/chocolate.png';
 import { useEffect, useRef, useState } from 'react';
 import chocolateMatchSFX from './../../../../../assets/audio/chocolateMatch.mp3';
-import LevelItemFX from '../fx/LevelItemFX';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
-import { latestSwappedCandyColor } from '../LevelManager';
 import anime, { AnimeInstance } from 'animejs';
 import { scoreState } from '../../../../../recoil/atoms/score';
 import { scoreFxListState } from '../../../../../recoil/atoms/scoreFxList';
@@ -46,7 +44,7 @@ type ChocolateProps = {
 };
 
 const Chocolate = ({ id, index }: ChocolateProps) => {
-	const [showFX, setShowFX] = useState(false);
+	const [show, setShow] = useState(true);
 	const itemUsedRef = useRef(false);
 	const levelItems = useRecoilValue(levelItemsState);
 	const elementRef = useRef<HTMLImageElement | null>(null);
@@ -70,7 +68,7 @@ const Chocolate = ({ id, index }: ChocolateProps) => {
 	}, [levelItems]);
 
 	const onItemMatch = () => {
-		setShowFX(true);
+		setShow(false);
 		setScore(score => score + CHOCHOLATE_SCORE);
 		chocolateMatchSound.play();
 		setScoreFxList(list => [
@@ -84,10 +82,16 @@ const Chocolate = ({ id, index }: ChocolateProps) => {
 		]);
 	};
 
-	return showFX ? (
-		<LevelItemFX color={latestSwappedCandyColor} maskSrc='/img/fx/triangleShape.png'></LevelItemFX>
-	) : (
-		<img data-chocolate ref={elementRef} src={chocolateSprite} className='block w-full h-full m-0 select-none pointer-events-none'></img>
+	return (
+		<img
+			data-chocolate
+			ref={elementRef}
+			src={chocolateSprite}
+			className='w-full h-full m-0 select-none pointer-events-none'
+			style={{
+				display: show ? 'block' : 'none',
+			}}
+		></img>
 	);
 };
 

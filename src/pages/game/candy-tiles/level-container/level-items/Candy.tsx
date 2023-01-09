@@ -1,12 +1,11 @@
-import red from './../../../../../assets/candies/red.png';
-import orange from './../../../../../assets/candies/orange.png';
-import yellow from './../../../../../assets/candies/yellow.png';
-import green from './../../../../../assets/candies/green.png';
-import blue from './../../../../../assets/candies/blue.png';
-import purple from './../../../../../assets/candies/purple.png';
+import red from './../../../../../assets/img/candies/red.png';
+import orange from './../../../../../assets/img/candies/orange.png';
+import yellow from './../../../../../assets/img/candies/yellow.png';
+import green from './../../../../../assets/img/candies/green.png';
+import blue from './../../../../../assets/img/candies/blue.png';
+import purple from './../../../../../assets/img/candies/purple.png';
 import candyBounceSFX from './../../../../../assets/audio/candyBounce.mp3';
 import { useEffect, useRef, useState } from 'react';
-import LevelItemFX from '../fx/LevelItemFX';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { levelItemsState } from '../../../../../recoil/atoms/levelItems';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
@@ -58,7 +57,7 @@ type CandyProps = {
 const CANDY_SCORE = 10;
 
 const Candy = ({ color, id, index }: CandyProps) => {
-	const [showFX, setShowFX] = useState(false);
+	const [show, setShow] = useState(false);
 	const levelItems = useRecoilValue(levelItemsState);
 	const elementRef = useRef<HTMLElement | null>(null);
 	const userInteractedWithDocument = useRecoilValue(userInteractedWithDocumentState);
@@ -72,7 +71,7 @@ const Candy = ({ color, id, index }: CandyProps) => {
 	}, []);
 
 	useEffect(() => {
-		!!id && setShowFX(false);
+		!!id && setShow(true);
 	}, [id]);
 
 	useEffectAfterFirstRender(() => {
@@ -84,7 +83,7 @@ const Candy = ({ color, id, index }: CandyProps) => {
 	const onItemMatch = () => {
 		itemUsed.current = true;
 		setScore(score => score + CANDY_SCORE);
-		setShowFX(true);
+		setShow(false);
 		setScoreFxList(list => [
 			...list,
 			{
@@ -98,15 +97,15 @@ const Candy = ({ color, id, index }: CandyProps) => {
 
 	return (
 		<span className='relative w-full h-full block' ref={elementRef}>
-			{showFX ? (
-				<LevelItemFX color={color} maskSrc='/img/fx/doughnutShape.png'></LevelItemFX>
-			) : (
+			{show ? (
 				<img
 					data-candy
 					data-color={color}
 					src={candyImages[color]}
 					className='block w-full h-full m-0 select-none pointer-events-none relative'
 				></img>
+			) : (
+				<></>
 			)}
 		</span>
 	);

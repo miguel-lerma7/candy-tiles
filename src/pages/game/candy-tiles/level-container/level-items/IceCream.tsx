@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import iceCreamSprite from './../../../../../assets/candies/ice-cream.png';
+import iceCreamSprite from './../../../../../assets/img/candies/ice-cream.png';
 
 type IceCreamProps = {
 	id: string;

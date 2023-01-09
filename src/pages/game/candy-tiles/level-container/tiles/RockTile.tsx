@@ -7,6 +7,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { matchListState } from '../../../../../recoil/atoms/matchList';
 import useEffectAfterFirstRender from '../../../../../hooks/useEffectAfterFirstRender';
 import { levelTilesState } from '../../../../../recoil/atoms/levelTiles';
+import rockTileSprite from './../../../../../assets/img/tiles/rock.png';
 
 const rockCrack1Sound = new Audio(rockCrack1SFX);
 const rockCrack2Sound = new Audio(rockCrack2SFX);
@@ -39,7 +40,7 @@ const RockTile = ({ index }: TileProps) => {
 	return (
 		<div className='relative bg-black/25 m-[2%] hover:invert duration-200 select-none rounded cursor-not-allowed' data-index={index}>
 			<img
-				src='/img/tiles/rock2.png'
+				src={rockTileSprite }
 				className='pointer-events-none'
 				style={{
 					opacity: damaged ? 0.6 : 1,
