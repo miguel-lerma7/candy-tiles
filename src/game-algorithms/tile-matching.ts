@@ -1,11 +1,13 @@
 import uuid from 'react-uuid';
 import { COLUMN_NUMBER, ROW_NUMBER } from '../config';
+import LevelItem from '../pages/game/candy-tiles/level-container/level-items/LevelItem';
 import { findAllIndeces, getArrayNumberSum, getNumberRangeArray, getNumberSequenceArray } from '../utils/array';
 export const CANDY_COLOR_LIST: string[] = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
 export const CANDY_TYPES_ARRAY = ['Candy', 'SuperCandy'];
 
 export const getItemRowIndex = (index: number): number => Math.ceil((index + 1) / COLUMN_NUMBER);
 export const getItemColumnIndex = (index: number): number => index + 1 - (getItemRowIndex(index) - 1) * ROW_NUMBER;
+const emptyMatchDetail: MatchDetail = { index: -1, matched: false, down: 0, left: 0, right: 0, up: 0 };
 
 const getAdjacentIndexes = (index: number): number[] => {
 	const verticalAdjacentIndexOffsets = [index - COLUMN_NUMBER, index + COLUMN_NUMBER];
@@ -30,9 +32,7 @@ export const getTileTargetPosition = (index: number, tileTargetIndex: number): T
 	return [top, left];
 };
 
-type CandyInLevel = { index: number } & Candy;
-
-const getCandyMatchings = (candy: CandyInLevel, items: readonly LevelItem[]): MatchDetail => {
+const getCandyMatchings = (candy: { index: number } & (Candy | SuperCandy), items: readonly LevelItem[]): MatchDetail => {
 	const rowIndex = getItemRowIndex(candy.index);
 	const columnIndex = getItemColumnIndex(candy.index);
 
@@ -65,6 +65,38 @@ const getCandyMatchings = (candy: CandyInLevel, items: readonly LevelItem[]): Ma
 	return { index: candy.index, matched, up, right, down, left };
 };
 
+const makeSuperCandyMatch = (superCandy: { index: number } & SuperCandy, items: readonly LevelItem[]): MatchDetail[] => {	
+	const matchedIndices: number[] = [];
+	const getAllIntersectingItems = (superCandy: { index: number } & SuperCandy, items: readonly LevelItem[]): MatchDetail[] => {
+		const matchList: MatchDetail[] = [];
+		const affectedItems = getHorizontalAndVerticalItems(superCandy.index);
+		const candies = affectedItems.filter(x => items[x]?.type === 'Candy' && !matchedIndices.includes(x));
+		const superCandies = affectedItems.filter(x => items[x]?.type === 'SuperCandy' && !matchedIndices.includes(x));
+
+		candies.forEach(index => {
+			matchedIndices.push(index);
+			matchList.push({ ...emptyMatchDetail, index, matched: true });
+		});
+		superCandies.forEach(index => {
+			matchedIndices.push(index);
+			matchList.push({ ...emptyMatchDetail, index, matched: true });
+			matchList.push(...getAllIntersectingItems({ index, ...(items[index] as SuperCandy) }, items));
+		});
+
+		return matchList;
+	};
+	const matchList = getAllIntersectingItems(superCandy, items);
+	return matchList;
+};
+
+const getIceCreamMatchings = (iceCream: { index: number } & IceCream): MatchDetail => {
+	return {
+		...emptyMatchDetail,
+		index: iceCream.index,
+		matched: getItemRowIndex(iceCream.index) === ROW_NUMBER,
+	};
+};
+
 const getMatchGroups = (matchList: MatchDetail[], itemsList: readonly LevelItem[]): MatchGroup[] => {
 	const matchedCandyList = matchList.filter(x => x.matched && CANDY_TYPES_ARRAY.includes(itemsList[x.index]?.type || ''));
 	if (matchedCandyList.length === 0) return [];
@@ -95,13 +127,51 @@ const getMatchGroups = (matchList: MatchDetail[], itemsList: readonly LevelItem[
 	return groups;
 };
 
-export const checkForMatchings = (items: readonly LevelItem[]): MatchResult => {
-	const candies = [...structuredClone(items)]
-		.map((x, index) => ({ ...x, index }))
-		.filter(x => CANDY_TYPES_ARRAY.includes((x as LevelItem)?.type || '')) as CandyInLevel[];
-	const matchingList: MatchDetail[] = [];
-	candies.forEach(candy => matchingList.push(getCandyMatchings(candy, items)));
+type ItemListByType = {
+	candies: ({ index: number } & Candy)[];
+	superCandies: ({ index: number } & SuperCandy)[];
+	chocolates: ({ index: number } & Chocolate)[];
+	iceCreams: ({ index: number } & IceCream)[];
+};
 
+const getItemsSeparatedByType = (items: readonly LevelItem[]): ItemListByType => {
+	const listByType: ItemListByType = {
+		candies: [],
+		superCandies: [],
+		chocolates: [],
+		iceCreams: [],
+	};
+
+	[...items].forEach((item, index) => {
+		switch (item?.type) {
+			case 'Candy':
+				listByType.candies.push({ ...item, index });
+				break;
+			case 'SuperCandy':
+				listByType.superCandies.push({ ...item, index });
+				break;
+			case 'Chocolate':
+				listByType.chocolates.push({ ...item, index });
+				break;
+			case 'IceCream':
+				listByType.iceCreams.push({ ...item, index });
+				break;
+		}
+	});
+	return listByType;
+};
+
+export const checkForMatchings = (items: readonly LevelItem[]): MatchResult => {
+	const { candies, superCandies, iceCreams } = getItemsSeparatedByType(items);
+	const matchingList: MatchDetail[] = [];
+
+	candies.forEach(candy => matchingList.push(getCandyMatchings(candy, items)));
+	superCandies.forEach(superCandy => {
+		const matchDetail = getCandyMatchings(superCandy, items);
+		matchingList.push(matchDetail);
+		matchDetail.matched && matchingList.push(...makeSuperCandyMatch(superCandy, items));
+	});
+	iceCreams.forEach(iceCream => matchingList.push(getIceCreamMatchings(iceCream)));
 	const matchingGroups = getMatchGroups(matchingList, items);
 
 	return {
@@ -190,9 +260,9 @@ export const generateNewCandies = (items: readonly LevelItem[], tiles: readonly 
 	return newCandies;
 };
 
-export const getHorizontalAndVerticalItems = (startIndex: number): number[] => {
-	const rowIndex = Math.ceil((startIndex + 1) / ROW_NUMBER);
-	const columnIndex = startIndex + 1 - (rowIndex - 1) * ROW_NUMBER;
+export const getHorizontalAndVerticalItems = (originIndex: number): number[] => {
+	const rowIndex = Math.ceil((originIndex + 1) / ROW_NUMBER);
+	const columnIndex = originIndex + 1 - (rowIndex - 1) * ROW_NUMBER;
 
 	const horizontalRangeStart = (rowIndex - 1) * COLUMN_NUMBER;
 	const horizontalRangeEnd = horizontalRangeStart + (COLUMN_NUMBER - 1);
@@ -200,7 +270,7 @@ export const getHorizontalAndVerticalItems = (startIndex: number): number[] => {
 	const horizontalItems = getNumberRangeArray(horizontalRangeStart, horizontalRangeEnd);
 	const verticalItems = getNumberSequenceArray(columnIndex - 1, ROW_NUMBER - 1, COLUMN_NUMBER);
 
-	return [...horizontalItems, ...verticalItems];
+	return [...horizontalItems, ...verticalItems].filter(x => x !== originIndex);
 };
 
 export const allTilesFilled = (items: readonly LevelItem[], tiles: readonly LevelTile[]): boolean => {
@@ -222,7 +292,6 @@ const excludeMatchesOutsideGroup = (match: MatchDetail, group: MatchGroup): Matc
 	return match;
 };
 
-const emptyMatchDetail: MatchDetail = { index: -1, matched: false, down: 0, left: 0, right: 0, up: 0 };
 export const getMatchGroupCenterIndex = (matchGroup: MatchGroup, matchList: MatchDetail[]): number => {
 	let matchDetails = matchGroup.map(x => matchList.find(detail => detail.index === x) || emptyMatchDetail);
 	matchDetails = matchDetails.map(match => excludeMatchesOutsideGroup(match, matchGroup));
@@ -244,7 +313,11 @@ export const getMatchGroupCenterIndex = (matchGroup: MatchGroup, matchList: Matc
 	return groupCenterIndex || -1;
 };
 
-export const matchAllCandiesOfColor = (matchList: readonly MatchDetail[], itemList: readonly LevelItem[], color: CandyColor): MatchDetail[] => {
+export const matchAllCandiesOfColor = (
+	matchList: readonly MatchDetail[],
+	itemList: readonly LevelItem[],
+	color: CandyColor
+): MatchDetail[] => {
 	return matchList.map(matchDetail => {
 		(itemList[matchDetail.index] as Candy).color === color && (matchDetail.matched = true);
 		return matchDetail;

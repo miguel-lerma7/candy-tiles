@@ -7,7 +7,6 @@ import {
 	CANDY_TYPES_ARRAY,
 	checkForMatchings,
 	generateNewCandies,
-	getHorizontalAndVerticalItems,
 	getMatchGroupCenterIndex,
 	matchAllCandiesOfColor,
 	repositionItems,
@@ -38,8 +37,6 @@ const playFusionMatch = () => {
 
 const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[] => {
 	const newItemList = structuredClone(itemList) as LevelItem[];
-	matchInfo.matchingList = applySuperCandyEffects(matchInfo.matchingList, newItemList);
-
 	const matchGroupsCenters = matchInfo.matchingGroups.map(group => getMatchGroupCenterIndex(group, matchInfo.matchingList));
 	matchInfo.matchingList
 		.filter(x => x.matched)
@@ -51,33 +48,6 @@ const applyMatches = (matchInfo: MatchResult, itemList: LevelItem[]): LevelItem[
 		});
 
 	return newItemList;
-};
-
-const applySuperCandyEffects = (matchList: MatchDetail[], itemList: LevelItem[]): MatchDetail[] => {
-	let newMatchList = structuredClone(matchList) as MatchDetail[];
-	const matchedItems = matchList.filter(x => x.matched);
-	const matchedSuperCandies = itemList.filter((x, i) => x?.type === 'SuperCandy' && matchedItems.some(y => y.index === i));
-
-	const superCandiesUsed: number[] = [];
-
-	const getAllIntersectingCandies = (matchedSuperCandy: LevelItem) => {
-		const matchedSuperCandyIndex = itemList.findIndex(y => y?.key === matchedSuperCandy?.key);
-		superCandiesUsed.push(matchedSuperCandyIndex);
-		const intersectingItems = getHorizontalAndVerticalItems(matchedSuperCandyIndex);
-
-		newMatchList = newMatchList.map(matchDetail => {
-			intersectingItems.includes(matchDetail.index) && (matchDetail.matched = true);
-			return matchDetail;
-		});
-
-		intersectingItems
-			.filter(x => itemList[x]?.type === 'SuperCandy' && !superCandiesUsed.includes(x))
-			.forEach(x => getAllIntersectingCandies(itemList[x]));
-	};
-
-	matchedSuperCandies.forEach(x => getAllIntersectingCandies(x));
-
-	return newMatchList;
 };
 
 const getInitialItems = (selectedLevel: number): LevelItem[] => {
@@ -143,8 +113,9 @@ const LevelManager = () => {
 	};
 
 	const checkForMatches = async (itemList: LevelItem[], checkSwap: boolean): Promise<void> => {
-		let matchInfo = checkForMatchings(itemList);
-		matchInfo = checkChocolateSwap(matchInfo, itemList);
+		//TODO: REFACTOR CHOCOLATE MATCH
+		checkChocolateSwap(itemList);
+		const matchInfo = checkForMatchings(itemList);
 
 		if (matchInfo.thereWereMatches || !allTilesFilled(itemList, levelTiles)) {
 			itemsWereSwapped.current &&
@@ -172,27 +143,26 @@ const LevelManager = () => {
 		setAllowSwap(true);
 	};
 
-	const checkChocolateSwap = (matchInfo: MatchResult, itemList: LevelItem[]): MatchResult => {
+	const checkChocolateSwap = (itemList: LevelItem[]): MatchDetail[] => {
 		const swappedChocolateIndex = itemList.findIndex((x, i) => swappedItems.includes(i) && x?.type === 'Chocolate');
 		const otherItemSwapIndex = swappedItems.find(x => x !== swappedChocolateIndex);
 		const otherItem = itemList.find((x, i) => i === otherItemSwapIndex);
+		let matchList: MatchDetail[] = [];
 
 		const canSwap = swappedChocolateIndex < 0 || !itemsWereSwapped.current || !CANDY_TYPES_ARRAY.includes(otherItem?.type || '');
-		if (canSwap) return matchInfo;
+		if (canSwap) return [];
 
 		const otherItemIndex = swappedItems.find(x => x !== swappedChocolateIndex);
 		const otherItemColor: CandyColor = (levelItems[swappedChocolateIndex] as Candy).color || DEFAULT_SWAPPED_CANDY_COLOR;
 		latestSwappedCandyColor = otherItemColor;
 
-		matchInfo.matchingList = matchAllCandiesOfColor(matchInfo.matchingList, itemList, otherItemColor);
+		matchList = matchAllCandiesOfColor(matchList, itemList, otherItemColor);
 
 		const matchProps = { down: 0, left: 0, right: 0, up: 0 };
-		matchInfo.matchingList.push({ index: swappedChocolateIndex, matched: true, ...matchProps });
-		typeof otherItemIndex === 'number' && matchInfo.matchingList.push({ index: otherItemIndex, matched: true, ...matchProps });
+		matchList.push({ index: swappedChocolateIndex, matched: true, ...matchProps });
+		typeof otherItemIndex === 'number' && matchList.push({ index: otherItemIndex, matched: true, ...matchProps });
 
-		matchInfo.thereWereMatches = matchInfo.matchingList.some(x => x.matched);
-
-		return matchInfo;
+		return matchList;
 	};
 
 	return <></>;

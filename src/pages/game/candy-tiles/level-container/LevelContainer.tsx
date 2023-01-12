@@ -16,9 +16,9 @@ const LevelContainer = () => {
 		<section
 			className='grow aspect-square rounded-lg overflow-hidden relative select-none'
 			ref={levelGridElement}
-			style={{
+			/* style={{
 				filter: levelMoves.spendAllMoves ? 'grayscale(0.8)' : '',
-			}}
+			}} */
 		>
 			<LevelManager></LevelManager>
 			<TileGrid></TileGrid>
